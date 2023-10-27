@@ -1,0 +1,113 @@
+.addmodal .modal-header {
+    background-color: darkseagreen;
+    text-align: center;
+    color: white;
+
+}
+
+.form-footer {
+  margin-right: 430px;
+  /* left: 205px; */
+}
+
+.btn .btn-danger {
+  margin-left:200px;
+}
+
+
+
+.form-group-1  {
+    margin-left: 20px;
+    width: 208px;
+} 
+.form-group-3 {
+    width: 260px;
+}
+.form-group-3 .form-control {
+    width: 230px
+}
+.form-group-4 {
+    width: 100px;
+}
+.form-group-4 .form-control {
+    width: 80px;
+}
+
+.form-check {
+    display: inline-block;
+    margin: 0 10px 0 10px;
+    padding: 10px;
+    width: 130px;
+}
+
+.modal-content {
+    width:900px;
+    margin-left: -200px;
+}
+.form-group-2 {
+    width: 400px;
+}
+
+.form-group-2 .form-control {
+    width: 390px;
+}
+
+
+
+
+
+
+
+
+
+
+/* Tùy chỉnh modal dialog
+/* .addmodal {
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  } 
+  
+  /* Tùy chỉnh modal header */
+   /* .addmodal .modal-header {
+    background-color: #007BFF;
+    color: #fff;
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem;
+    text-align: center;
+  }  */
+  
+  /* Tùy chỉnh modal title */
+  .addmodal .modal-title {
+    font-size: 24px;
+  }
+  
+  /* Tùy chỉnh modal body */
+  .addmodal .modal-body {
+    padding: 2rem;
+  }
+  
+  /* Tùy chỉnh form group */
+  /* .addmodal .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  /* Tùy chỉnh input và select */
+  /* .addmodal .form-control {
+    border-radius: 5px;
+    padding: 0.5rem;
+  } */ 
+  
+  /* Tùy chỉnh modal footer */
+  .addmodal .modal-footer {
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    padding: 1rem;
+  }
+  
+  /* Tùy chỉnh buttons trong modal footer */
+  .addmodal .btn {
+    margin: 0.25rem;
+  }

@@ -1,0 +1,16 @@
+.Login h2 {
+    text-align: center;
+}
+
+/* .loginform {
+    
+} */
+.Login .form-group {
+    margin-top: 20px;
+    margin-left: 175px;
+}
+
+.Login .btn {
+    margin-top: 20px;
+    margin-left: 175px;
+}

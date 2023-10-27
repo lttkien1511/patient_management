@@ -1,0 +1,93 @@
+.Sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    padding-top: 20px;
+  }
+
+.PatientInfo {
+    margin-left: 250px;
+}
+
+.tab-content h3 {
+  margin-top: 20px;
+}
+
+
+.search-form {
+  padding-left: 30px;
+  /* margin-left: 60px; */
+}
+
+.clickbutton {
+  margin-left: 30px;
+  margin-top:20px;
+  background-color: aquamarine;
+  border-style: none;
+  color: #111;
+}
+
+.form-control {
+  width: 160px;
+}
+
+.thong-tin-benh-nhan {
+  background-color:beige;
+  border-style: groove;
+  padding-bottom: 12px;
+}
+/* 
+.Treatment .form-control {
+  width: 230px;
+}
+.Treatment .sohoso .form-control {
+  width:150px;
+}
+.Treatment .hoten .form-control {
+  width:300px;
+}
+
+.Treatment .gioitinh .form-control {
+  width:100px;
+}
+.Treatment .tuoi .form-control {
+  width:50px;
+}
+.Treatment .diachi .form-control {
+  width:500px;
+} */
+.Treatment .gioitinh .form-control {
+  width: 100px;
+}
+
+.Treatment .sohoso {
+  margin-right: 10px;
+}
+
+.Treatment .lydokham {
+  margin-left: 30px;
+}
+
+.Treatment .diachi .form-control {
+  width: 400px
+}
+
+.tien-su-benh {
+  background-color:bisque;
+  border-style: groove;
+}
+
+.Treatment .button {
+  margin-right: 10px;
+  width: 130px;
+  margin-bottom: 5px;
+}
+
+.Treatment .chandoan .form-control{
+  width: 400px;
+}
