@@ -1,0 +1,4 @@
+Yêu cầu đối với phần mềm:
+4/10/2023
+- Sử dụng NoSQL
+- 
