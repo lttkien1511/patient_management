@@ -32,12 +32,17 @@
 .form-group-4 .form-control {
     width: 80px;
 }
-
+.form-group-5 .form-control {
+  width: 790px;
+}
 .form-check {
     display: inline-block;
     margin: 0 10px 0 10px;
     padding: 10px;
     width: 130px;
+}
+.form-check-payment {
+  width: 200px;
 }
 
 .modal-content {

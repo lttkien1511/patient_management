@@ -17,7 +17,8 @@ function App() {
           <Route path="/" element={<Login/>} />
           <Route path="/ho-so-benh-nhan" element={<PatientInfo/>} />
           {/* <Route path='/doi-mat-khau' element={<ChangePassword/>}></Route> */}
-          <Route path='/dieu-tri/:idnumber' element={<Treatment/>} />
+          <Route path='/dieu-tri/:idnumber' element={<Treatment  />} />
+          
         </Routes>
       </BrowserRouter>
     </div>

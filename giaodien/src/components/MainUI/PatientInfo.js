@@ -10,13 +10,13 @@ import Edit from "./Function/Edit";
 import { useNavigate } from "react-router-dom";
 
 
-function PatientInfo(props) {
+function PatientInfo({}) {
     const [addModal, setAddModal] = useState(false);
     const [editModal, setEditModal] =useState(false);
     const [deleteModal, setDeleteModal] = useState(false);
-    const [treatment, setTreatment] = useState(false);
+    //const [treatment, setTreatment] = useState(false);
 
-    const [selectedRow, setSelectedRow] = useState(null);
+    //const [selectedRow, setSelectedRow] = useState(null);
 
     const [sidebar, setSidebar] = useState(true);
     const navigate = useNavigate();
@@ -34,15 +34,28 @@ function PatientInfo(props) {
     const [searchTelQuery, setSearchTelQuery] = useState("");
 
     const handleRowDoubleClick = (idnumber) => {
-        //const idnumber = props.idnumber;
-        //e.preventDefault();
-        //setSelectedRow(e);
-        //setTreatment(true);
-        //navigate=(`/dieu-tri/${idnumber}`);
         const treatmenturl = `/dieu-tri/${idnumber}`;
         navigate(treatmenturl);
-    
+        // let config = {
+        //     method: 'get',
+        //     maxBodyLength: Infinity,
+        //     url: `http://127.0.0.1:8000/getAllData/${idnumber}`,
+        //     headers: { }
+        //   };
+          
+        //   axios.request(config)
+        //   .then((response) => {
+        //     console.log(JSON.stringify(response.data));
+        //     navigate(treatmenturl);
+        //   })
+        //   .catch((error) => {
+        //     console.log(error);
+        //   });
+          
+        
     }
+
+
 
      const handleFilter = (e) => {
         e.preventDefault();

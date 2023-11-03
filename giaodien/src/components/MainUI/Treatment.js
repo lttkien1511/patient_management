@@ -1,13 +1,43 @@
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+//import { useP } from "react";
 //import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 //import Container from 'react-bootstrap/Container';
 import Button from "react-bootstrap/esm/Button";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import Payment from "./TreatmentFunction/Payment";
+import Thuthuat from "./TreatmentFunction/Thuthuat";
 
 function Treatment() {
-    
+    const {idnumber} = useParams();
+    const [detailData, setDetailData] =useState({});
+    const [payment, setPayment] = useState(false);
+    const [thuthuat, setThuthuat] = useState(false);
+
+    const [nhomthuthuat, setNhomthuthuat] = useState([]);
+
+    // useEffect(() => {
+    //     axios.get(`http://127.0.0.1:8000/getallnhomthuthuat`)
+    //     .then((response) => {
+    //         setNhomthuthuat(response.data.allgroup);
+    //       })
+    //       .catch((error) => {
+    //         console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
+    //       });
+    // },[]);
+
+
+    useEffect(()=> {
+        axios.get(`http://127.0.0.1:8000/getAllData/${idnumber}`)
+        .then((response) => {
+            setDetailData(response.data);
+          })
+          .catch((error) => {
+            console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
+          });
+    }, [idnumber]);
     return (
     <div  className='Treatment'>
 
@@ -22,13 +52,13 @@ function Treatment() {
                         <ul className='nav'>
                         <li>
                             <div className='sohoso'>
-                                <label htmlFor='name' className='form-label'>SỐ HỒ SƠ</label>
+                                <label htmlFor='idnumber' className='form-label'>SỐ HỒ SƠ</label>
                                 <input type='text' 
                                 className='form-control' 
-                                id='name' 
-                                name='name'
-                                //value={add.name}
-                                
+                                id='idnumber' 
+                                name='idnumber'
+                                value={detailData.idnumber}
+                                disabled
                                 //onChange={handleAdd}
                                 > 
                                 </input>
@@ -41,8 +71,8 @@ function Treatment() {
                                 className='form-control' 
                                 id='name' 
                                 name='name'
-                                //value={add.name}
-                                
+                                value={detailData.name}
+                                disabled
                                 //onChange={handleAdd}
                                 > 
                                 </input>
@@ -55,8 +85,9 @@ function Treatment() {
                                 className='form-control' 
                                 id='age'
                                 name='age'
-                                //value={add.age}
+                                value={detailData.age}
                                 //onChange={handleAdd} 
+                                disabled
                                 >
                                 </input>
                             </div>
@@ -64,12 +95,13 @@ function Treatment() {
                         <li>
                             <div className='form-group-1'>
                                 <label htmlFor='birthday' className='form-label'>NGÀY SINH</label>
-                                <input type='date' 
+                                <input type='text' 
                                 className='form-control' 
                                 id='birthday' 
                                 name='birthday'
-                                //value={add.birthday}
+                                value={detailData.birthday}
                                 //onChange={handleAdd}
+                                disabled
                                 >
                                 </input>
                             </div>
@@ -77,15 +109,18 @@ function Treatment() {
                         <li>
                             <div className='gioitinh'>
                                 <label htmlFor='gender' className='form-label'>GIỚI TÍNH</label>
-                                <select className='form-control'
+                                <input type="text"
+                                className='form-control'
+                                id="gender"
                                 name='gender'
-                                //value={add.gender}
+                                value={detailData.gender}
+                                disabled
                                 //onChange={handleAdd}
                                 >
-                                    <option value="Nam">Nam</option>
+                                    {/* <option value="Nam">Nam</option>
                                     <option value="Nữ">Nữ</option>
-                                    <option value="Khác">Khác</option>
-                                </select>
+                                    <option value="Khác">Khác</option> */}
+                                </input>
                             </div>
                         </li>
                         
@@ -95,9 +130,9 @@ function Treatment() {
                                 <input type='text' 
                                 className='form-control' 
                                 id='address' 
-                                
                                 name='address'
-                                //value={add.address}
+                                value={detailData.address}
+                                disabled
                                 //onChange={handleAdd}
                                 >                                    
                                 </input>
@@ -111,10 +146,9 @@ function Treatment() {
                                 className='form-control' 
                                 id='reason'
                                 name='reason'
-                                //value={add.reason}
+                                value={detailData.reason}
+                                disabled
                                 //onChange={handleAdd} 
-                                
-                                
                                 >                                    
                                 </input>
                             </div>
@@ -290,8 +324,13 @@ function Treatment() {
                     <Col>
                         <Row>
                             <Col >
-                                <Button className="button">Khám bệnh</Button>
-                                <Button className="button">Thanh toán</Button>
+                                <Button className="button" onClick={()=>setThuthuat(true)}>Khám bệnh</Button>
+                                {/* <Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)}/> */}
+                                {thuthuat && <Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)} nhomthuthuat={nhomthuthuat} />}
+
+                                <Button className="button" onClick={()=> setPayment(true)}>Thanh toán</Button>
+                                <Payment show={payment} onHide={()=>setPayment(false)}/>
+                                
                                 <Button className="button">Đơn thuốc</Button>
                             </Col>
                         </Row>

@@ -1,0 +1,24 @@
+.thuthuatdieutri .modal-content {
+    width: 1500px;
+    margin-left: -500px;
+    /* padding: 0 50px 0 50px; */
+     
+}
+.thuthuatdieutri .modal-dialog  {
+    width: 2000px;
+}
+
+.thuthuatdieutri .nhomthuthuat {
+    width: 50%;
+    float: left;
+    padding: 5px;
+}
+
+
+.thuthuatdieutri .modal-body {
+    display: inline-block;
+}
+
+.thuthuatdieutri th {
+    text-align: center;
+}

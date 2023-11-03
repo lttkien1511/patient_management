@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status,  Response
+from fastapi import FastAPI, Depends, HTTPException, status,  Response, Query
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import random
 from fastapi import Request
@@ -10,7 +10,8 @@ from pydantic import BaseModel
 from datetime import datetime, date
 from enum import Enum
 from typing import List
-from fastapi.encoders import jsonable_encoder
+#from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 
 
@@ -20,6 +21,8 @@ db = db_connection.co_so_du_lieu_benh_nhan
 collection = db['admin']
 session = db['session']
 patient = db['benh_nhan']
+nhomthuthuat = db['nhom_thu_thuat']
+thuthuat = db['thu_thuat']
 
 
 
@@ -72,6 +75,15 @@ class patientInfo(BaseModel):
     medical_history: List[str] 
     idnumber: int = None
     
+#class nhomthuthuat(BaseModel):
+    
+
+class noidungthuthuat(BaseModel):
+    ten_nhom_thu_thuat: str
+    ten_thu_thuat:str
+    don_gia:str
+    giam_gia:str
+
 history_state = {history: False for history in checkboxes}
 
 
@@ -246,7 +258,8 @@ async def filter_data(patientdata: dict = Body(...)):
             if(patientdata['condition'][col]['logic'] == "="):
                 filtercondition[col] = patientdata["condition"][col]['value']
             elif(patientdata["condition"][col]['logic'] == "like"):
-                filtercondition[col] = {"$regex": patientdata["condition"][col]['value']}
+                #filtercondition[col] = {"$regex": patientdata["condition"][col]['value']}
+                filtercondition[col] = {"$regex": patientdata["condition"][col]['value'],"$options":"i"}
     
     total = patient.count_documents(filtercondition)
     data = patient.find(filtercondition).skip(skip).limit(limit)
@@ -311,3 +324,149 @@ async def updatedata(idnumber: int, patientdata: patientInfo = Body(...)):
 async def deletedata(idnumber: int):
     patient.delete_one({"idnumber":idnumber})
     return {"message": "Delete patient successfully!"}
+
+@app.get("/getAllData/{idnumber}")
+async def getAllData(idnumber:int):
+    patientdata = patient.find_one({"idnumber":idnumber})
+    if(patientdata is None): raise Exception("Invalid session id")
+    #print(patientdata)
+    patientid = patientdata['idnumber']
+    datainfo = patient.find_one({'idnumber':patientid},{
+        "_id":0,
+        "telephone":0, 
+        "email":0,
+        "input_date":0
+        })
+    #print(datainfo)
+    return datainfo
+
+@app.post('/addnhomthuthuat')
+async def addnhomthuthuat(thuthuatgroup:str):
+    newthuthuatgroup = {
+        "ten_nhom_thu_thuat":thuthuatgroup
+    }
+    newnhomthuthuat = nhomthuthuat.insert_one(newthuthuatgroup)
+    return {"message": "Thu thuat moi da duoc them vao"}
+
+
+@app.post('/addthuthuat')
+async def addthuthuat(id:str,  thuthuatdata : noidungthuthuat = Body(...)):
+    nhomthuthuatid = nhomthuthuat.find_one({"_id":ObjectId(id)})
+    #namenhomthuthuat = nhomthuthuat.find_one({"ten_nhom_thu_thuat": })
+    print(nhomthuthuatid)
+    thuthuatid = nhomthuthuatid['_id']
+    tennhomthuthuat = nhomthuthuatid['ten_nhom_thu_thuat']
+
+    dulieuthuthuat = {
+        "thuthuatid": thuthuatid,
+        "ten_nhom_thu_thuat": tennhomthuthuat,
+        "ten_thu_thuat": thuthuatdata.ten_thu_thuat,
+        "don_gia": thuthuatdata.don_gia,
+        "giam_gia": thuthuatdata.giam_gia
+
+    }
+    thuthuatmoi = thuthuat.insert_one(dulieuthuthuat)
+    
+    return {"message":"Thu thuat moi da duoc them vao"}
+
+# @app.get('/ten_nhom_thu_thuat')
+# async def ten_nhom_thu_thuat(nhomthuthuatid: str):
+#     nhomthuthuatid_obj = ObjectId(nhomthuthuatid)
+#     idthuthuat = thuthuat.find_one({"thuthuatid":nhomthuthuatid_obj})
+#     if idthuthuat is None:
+#             return {"message": "Thuthuat not found"}
+#     thuthuatid = idthuthuat['thuthuatid']
+#     tennhomthuthuat = thuthuat.find_one({"thuthuatid":thuthuatid},{
+#         "ten_thu_thuat":0,
+#         "don_gia":0,
+#         "giam_gia":0
+#     })
+#     return tennhomthuthuat
+# @app.get('/ten_nhom_thu_thuat')
+# async def ten_nhom_thu_thuat(nhomthuthuatid: str):
+#     try:
+#         nhomthuthuatid_obj = ObjectId(nhomthuthuatid)
+#         idthuthuat = thuthuat.find_one({"thuthuatid": nhomthuthuatid_obj})
+        
+#         if idthuthuat is None:
+#             return {"message": "Thuthuat not found"}
+        
+#         thuthuatid = idthuthuat['thuthuatid']
+#         tennhomthuthuat = thuthuat.find_one({"thuthuatid": thuthuatid},{
+#             "_id":0,
+#             "ten_thu_thuat":0,
+#             "don_gia":0,
+#             "giam_gia":0
+#         })
+#         if tennhomthuthuat:
+#             tennhomthuthuat["thuthuatid"] = str(tennhomthuthuat["thuthuatid"])  
+            
+        
+#         return tennhomthuthuat
+#     except Exception as e:
+#         return {"message": f"An error occurred: {str(e)}"}
+#Lưu ý: phải convert từ ObjectId về lại String
+
+@app.get("/getallnhomthuthuat")
+async def getallnhomthuthuat():
+    allgroup = list(nhomthuthuat.find({},{
+        "_id": 1,
+        "ten_nhom_thu_thuat": 1
+    }))
+    for group in allgroup:
+        group['_id']  = str(group['_id'])
+    return {"allgroup":allgroup}
+
+@app.get("/getthuthuat/{nhomthuthuatid}")
+async def getthuthuat(nhomthuthuatid:str):
+    try:
+        nhomthuthuatid_obj = ObjectId(nhomthuthuatid)
+        idthuthuat = thuthuat.find_one({"thuthuatid":nhomthuthuatid_obj})
+        if idthuthuat is None:
+            return {"message": "Thuthuat not found"}
+        thuthuatid = idthuthuat['thuthuatid']
+        tenthuthuat = thuthuat.find({"thuthuatid": thuthuatid},{
+            "_id":1,
+            "ten_thu_thuat":1,
+            "don_gia":1,
+            "giam_gia":1
+        })
+        if not tenthuthuat:
+            raise HTTPException(status_code=404, detail="Thuthuat data not found")
+        
+        tenthuthuat = [doc for doc in tenthuthuat]
+        for ten in tenthuthuat:
+            ten['_id'] = str(ten['_id'])
+        #print(tenthuthuat)
+        return tenthuthuat
+
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/thuthuatduocluachon/{id}")
+async def thuthuatduocluachon(id:str):
+    try:
+        thuthuatid_obj = ObjectId(id)
+        idthuthuat = thuthuat.find_one({"_id":thuthuatid_obj})
+        if idthuthuat is None:
+            return {"message": "Thu thuat not found"}
+        #print(idthuthuat)
+        thuthuatid = idthuthuat['_id']
+        tenthuthuat = thuthuat.find({"_id": thuthuatid},{
+            "_id":0,
+            "ten_thu_thuat":1,
+            "don_gia":1,
+            "giam_gia":1
+        })
+        if not tenthuthuat:
+            raise HTTPException(status_code=404, detail="Thuthuat data not found")
+
+        tenthuthuat = [doc for doc in tenthuthuat]
+        #print(tenthuthuat)
+        return tenthuthuat
+
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
