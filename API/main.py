@@ -23,6 +23,7 @@ session = db['session']
 patient = db['benh_nhan']
 nhomthuthuat = db['nhom_thu_thuat']
 thuthuat = db['thu_thuat']
+thuthuattungbenhnhan = db['thu_thuat_tung_benh_nhan']
 
 
 
@@ -75,14 +76,26 @@ class patientInfo(BaseModel):
     medical_history: List[str] 
     idnumber: int = None
     
-#class nhomthuthuat(BaseModel):
+
     
 
 class noidungthuthuat(BaseModel):
-    ten_nhom_thu_thuat: str
+    ten_nhom_thu_thuat: str | None = None
+    ten_thu_thuat:str | None = None
+    giam_gia:int | None = None
+    thanh_tien: int | None = None
+    don_gia:int | None = None
+    so_luong: int | None = None
+
+class thuthuatcanhan(BaseModel):
+    thuthuatid: str
     ten_thu_thuat:str
-    don_gia:str
-    giam_gia:str
+    #giam_gia:int
+    thanh_tien: int
+    don_gia:int
+    so_luong: int
+
+
 
 history_state = {history: False for history in checkboxes}
 
@@ -341,9 +354,10 @@ async def getAllData(idnumber:int):
     return datainfo
 
 @app.post('/addnhomthuthuat')
-async def addnhomthuthuat(thuthuatgroup:str):
+async def addnhomthuthuat(thuthuatgroup: noidungthuthuat = Body(...)):
     newthuthuatgroup = {
-        "ten_nhom_thu_thuat":thuthuatgroup
+        "ten_nhom_thu_thuat":thuthuatgroup.ten_nhom_thu_thuat,
+        
     }
     newnhomthuthuat = nhomthuthuat.insert_one(newthuthuatgroup)
     return {"message": "Thu thuat moi da duoc them vao"}
@@ -362,7 +376,9 @@ async def addthuthuat(id:str,  thuthuatdata : noidungthuthuat = Body(...)):
         "ten_nhom_thu_thuat": tennhomthuthuat,
         "ten_thu_thuat": thuthuatdata.ten_thu_thuat,
         "don_gia": thuthuatdata.don_gia,
-        "giam_gia": thuthuatdata.giam_gia
+        #"giam_gia": thuthuatdata.giam_gia,
+        #"thanh_tien": thuthuatdata.thanh_tien,
+        #"so_luong": thuthuatdata.so_luong
 
     }
     thuthuatmoi = thuthuat.insert_one(dulieuthuthuat)
@@ -421,16 +437,22 @@ async def getallnhomthuthuat():
 async def getthuthuat(nhomthuthuatid:str):
     try:
         nhomthuthuatid_obj = ObjectId(nhomthuthuatid)
-        idthuthuat = thuthuat.find_one({"thuthuatid":nhomthuthuatid_obj})
+        idthuthuat = nhomthuthuat.find_one({"_id":nhomthuthuatid_obj})
         if idthuthuat is None:
-            return {"message": "Thuthuat not found"}
-        thuthuatid = idthuthuat['thuthuatid']
+            return {"message": "Thu thuat not found"}
+        print(idthuthuat)
+
+
+        thuthuatid = idthuthuat['_id']
+
         tenthuthuat = thuthuat.find({"thuthuatid": thuthuatid},{
             "_id":1,
             "ten_thu_thuat":1,
             "don_gia":1,
             "giam_gia":1
         })
+        if tenthuthuat is None:
+            return {"message": "Thu thuat data not found"}
         if not tenthuthuat:
             raise HTTPException(status_code=404, detail="Thuthuat data not found")
         
@@ -469,4 +491,100 @@ async def thuthuatduocluachon(id:str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+# @app.post("/tinhtoanthuthuat")
+# async def tinhtoanthuthuat(id:str, patientitem: patientInfo = Body(...), item: noidungthuthuat = Body(...)):
+#     try:
+#         thuthuatid_obj = ObjectId(id)
+#         idthuthuat = thuthuat.find_one({"_id":thuthuatid_obj})
+
+#         if idthuthuat is None:
+#             return {"message": "Thu thuat not found"}
+#         #print(idthuthuat)
+#         thuthuatid = idthuthuat['_id']
+#         tenthuthuat = thuthuat.find_one({"_id":thuthuatid})
+#         print(tenthuthuat)
+#         if tenthuthuat:
+#             soluong = item.so_luong
+#             dongia = tenthuthuat['don_gia']
+#             thanhtien = dongia * soluong
+
+#             newdata = {
+#                 "ten_thu_thuat": tenthuthuat['ten_thu_thuat'],
+#                 "don_gia": dongia,
+#                 "so_luong": soluong,
+#                 "thanh_tien": thanhtien
+#             }
+
+#             thuthuatupdate = thuthuattungbenhnhan.insert_one(newdata)
+            
+#             return {"message": "success"}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+    
+
+@app.post("/thuthuatbenhnhan/{idnumber}")
+async def thuthuatbenhnhan( idnumber: int, item: thuthuatcanhan = Body(...)):
+    idbenhnhan = patient.find_one({"idnumber":idnumber})
+    if idbenhnhan is None:
+        return {"message": "benh nhan khong tim thay"}
+    
+    thuthuatid = item.thuthuatid
+    thuthuatid_obj = ObjectId(thuthuatid)
+    idthuthuat = thuthuat.find_one({"_id":thuthuatid_obj})
+    if idthuthuat is None:
+        return {"message": "Thu thuat not found"}
+    
+    idbenhnhan = idbenhnhan['idnumber']
+    thuthuatid = idthuthuat['_id']
+    tenthuthuat = thuthuat.find_one({"_id":thuthuatid})
+    ngay = datetime.now()
+    homnay=ngay.strftime("%d/%m/%Y")
+    #print(tenthuthuat)
+    if tenthuthuat:
+        soluong = item.so_luong
+        dongia = tenthuthuat['don_gia']
+        thanhtien = dongia * soluong
+        newdata = {
+            "thuthuatid": thuthuatid,
+            "idnumber": idbenhnhan,
+            "ten_thu_thuat": tenthuthuat['ten_thu_thuat'],
+            "don_gia": dongia,
+            "so_luong": soluong,
+            "thanh_tien": thanhtien,
+            "ngaykham": homnay
+        }
+        
+        thuthuatupdate = thuthuattungbenhnhan.insert_one(newdata)
+        
+        print(newdata)
+        
+        return {"message": "success"}
+    
+
+
+@app.get("/getthuthuatbenhnhan/{idnumber}")
+async def getthuthuatbenhnhan(idnumber: int):
+    #ten_thu_thuat, so_luong, don_gia, thanh_tien, ngaykham
+    idbenhnhan = thuthuattungbenhnhan.find_one({"idnumber": idnumber})
+    if idbenhnhan is None:
+        return {"message": "Benh nhan khong tim thay"}
+    print(idbenhnhan)
+    id = idbenhnhan['idnumber']
+    thuthuatcanhan = thuthuattungbenhnhan.find({"idnumber": id},{
+        "_id": 1,
+        "ten_thu_thuat": 1,
+        "so_luong":1,
+        "don_gia":1,
+        "thanh_tien":1,
+        "ngaykham": 1
+    })
+    if thuthuatcanhan is None:
+        return {"message": "data not found"}
+    
+    thuthuatcanhan = [doc for doc in thuthuatcanhan]
+    for canhan in thuthuatcanhan:
+        canhan['_id'] = str(canhan['_id'])
+
+    return thuthuatcanhan
 

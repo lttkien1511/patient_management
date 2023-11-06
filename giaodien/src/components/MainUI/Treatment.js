@@ -16,17 +16,34 @@ function Treatment() {
     const [payment, setPayment] = useState(false);
     const [thuthuat, setThuthuat] = useState(false);
 
+    const [chitiet, setChitiet] = useState([]);
+
+    //const [data,setData] = useState([]);
+
     const [nhomthuthuat, setNhomthuthuat] = useState([]);
 
-    // useEffect(() => {
-    //     axios.get(`http://127.0.0.1:8000/getallnhomthuthuat`)
-    //     .then((response) => {
-    //         setNhomthuthuat(response.data.allgroup);
-    //       })
-    //       .catch((error) => {
-    //         console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
-    //       });
-    // },[]);
+    const refreshData = () => {
+        console.log(idnumber);
+        axios
+        .get(`http://127.0.0.1:8000/getthuthuatbenhnhan/${idnumber}`)
+        .then((response)=>{
+            console.log(response.data);
+            setChitiet(response.data);
+        })
+        .catch((error) => {
+            console.error('Refresh error', error);
+        });
+    };
+
+    useEffect(()=> {
+        axios.get(`http://127.0.0.1:8000/getthuthuatbenhnhan/${idnumber}`)
+        .then((response) => {
+            setChitiet(response.data);
+        })
+        .catch((error) => {
+            console.error('Lỗi dữ liệu: ', error);
+        })
+    }, [idnumber]);
 
 
     useEffect(()=> {
@@ -38,6 +55,9 @@ function Treatment() {
             console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
           });
     }, [idnumber]);
+
+
+
     return (
     <div  className='Treatment'>
 
@@ -346,18 +366,16 @@ function Treatment() {
                 <hr/>
                 <div className="chi-tiet-kham-benh">
                     <h5>Chi tiết khám bệnh</h5>
-                    <div className="table-responsive">
+                    <Button className="button" onClick={refreshData}>REFRESH</Button>
+                    <div className="table-responsive" style={{ overflowY: "auto", maxHeight: "300px"}} >
+                    
                     <table className="table">
                         <thead>
                             <tr>
-                                <th>STT</th>
                                 <th>Ngày khám</th>
-                                <th>Lịch liệu trình</th>
-                                <th>Chẩn đoán chi tiết</th>
                                 <th>Răng</th>
                                 <th>Tên thủ thuật</th>
                                 <th>Nội dung thủ thuật</th>
-                                <th>Bác sỹ - trợ thủ</th>
                                 <th>Số lượng</th>
                                 <th>Đơn giá</th>
                                 <th>Thành tiền</th>
@@ -368,7 +386,25 @@ function Treatment() {
                         </thead>
 
                         <tbody>
-                            
+                            {chitiet ? (
+                                chitiet.map((item) => {
+                                    console.log(item)
+                                    return (
+                                        <tr key={item._id}>
+                                            <td>{item.ngaykham}</td>
+                                            <td></td>
+                                            <td>{item.ten_thu_thuat}</td>
+                                            <td></td>
+                                            <td>{item.so_luong}</td>
+                                            <td>{item.don_gia}</td>
+                                            <td>{item.thanh_tien}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    );
+                                })
+                            ): null}
                         </tbody>
                     </table>
                     
