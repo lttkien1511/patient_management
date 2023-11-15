@@ -81,130 +81,141 @@ function PatientInfo({}) {
           });
     }
     
-    
-
-
-
     return (
-    <div  className='PatientInfo'>
-        {setSidebar && <Sidebar/>}
+    <div className='PatientInfo'>
+        {/* Sidebar */}
+        <nav className="navfunction">
+            <div className="container-fluid">
+                <ul className="nav navbar-nav">
+                    <li className="nav-items">
+                        <Button className="btnmenu btn-primary"
+                        onClick={()=>  {setSidebar(true)}}
+                        >
+                            <i class='bx bx-menu'></i>
+                        </Button>
+                        {sidebar && <Sidebar show={sidebar} onHide={()=>setSidebar(false)}/>}
+                    </li>
+
+                    <li className="nav-items text-center">
+                        <h3>HỒ SƠ BỆNH NHÂN</h3> 
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <hr/>
+
+        <nav className="navfunction">
+            <div className="container-fluid">
+                <ul className="nav justify-content-between">
+                    <li className="nav-items" >
+                        <Button className="clickbutton" variant="primary" onClick={()=> setAddModal(true)}>
+                            <i class='bx bx-plus'>THÊM</i>
+                        </Button>
+                        <Add show={addModal} onHide={() => setAddModal(false)}/>
+                    </li>
+                    <li className='nav-items' >
+                        <div className="search-form">
+                            <label className="form-label">Chọn ngày</label>
+                            <input type="datetime-local" className="dateform form-control" placeholder="Nhập ngày"></input>
+                        </div>
+                    </li>
+                    <li className='nav-items' >
+                        <div className="search-form">
+                            <label>Số hồ sơ cũ</label>
+                            <input type="text" className="sohosocu form-control" ></input>
+                        </div>
+                    </li>
+                    <li className='nav-items' >
+                        <div className="search-form">
+                            <label>Số hồ sơ</label>
+                            <input type="text" className="sohoso form-control" ></input>
+                        </div>
+                    </li>
+                    <li className='nav-items' >
+                        <div className="search-form">
+                            <label>Điện thoại</label>
+                            <input type="tel" 
+                            className="dienthoai form-control" 
+                            value={searchTelQuery}
+                            onChange={(e) => setSearchTelQuery(e.target.value)}
+                            ></input>
+                        </div>
+                    </li>
+                    <li className='nav-items' >
+                        <div className="search-form">
+                            <label>Họ tên</label>
+                            <input type="text" 
+                            className="hoten form-control" 
+                            value={searchNameQuery}
+                            onChange={(e) => setSearchNameQuery(e.target.value)}
+                            ></input>
+                        </div>
+                    </li>
+                    <li className='nav-items' >
+                        <Button className="clickbutton" variant="primary" onClick={handleFilter}>
+                            <i class='bx bx-search'>TÌM KIẾM</i>
+                        </Button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <hr/>
+
+        <div className="table-responsive">
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>Các nút</th>
+                        <th>Số hồ sơ</th>
+                        <th>Họ tên</th>
+                        <th>Tuổi</th>
+                        <th>Giới tính</th>
+                        <th>Điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Lý do khám</th>
+                        <th>Ngày nhập</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {data.map((item) => (
+                        <tr key={item._id} onDoubleClick={()=>handleRowDoubleClick(item.idnumber)}>
+                            <td>
+                                <Button className="editbutton" variant="primary" onClick={()=> setEditModal(true)}>
+                                    SỬA
+                                </Button>
+                                <Edit show={editModal}  onHide={() => setEditModal(false)} idnumber={item.idnumber} />
+
+                                <Button className="deletebutton" variant="danger" onClick={()=>setDeleteModal(true)}>
+                                    XÓA
+                                </Button>
+                                <Delete show={deleteModal} onHide={() => setDeleteModal(false)} idnumber={item.idnumber} />
+
+                                <Button variant="warning">
+                                    GỬI THÔNG BÁO
+                                </Button>
+                            </td>
+                            <td>{item.idnumber}</td>
+                            <td>{item.name}</td>
+                            <td>{item.age}</td>
+                            <td>{item.gender}</td>
+                            <td>{item.telephone}</td>
+                            <td>{item.address}</td>
+                            <td>{item.reason}</td>
+                            <td>{item.input_date}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            
+        </div>
+        
+        
+        {/* Hồ sơ bệnh nhân */}
+        
         
 
-        <div className='tab-content'>
-            <div id = "hoso" className='container-fluid tab-pane active'>
-                <h3>HỒ SƠ BỆNH NHÂN</h3> 
-                <hr/>
-                <nav className="navfunction">
-                    <div className="container-fluid">
-                        <ul className='nav'>
-                            <li className='nav-items' >
-                                <Button className="clickbutton" variant="primary" onClick={()=> setAddModal(true)}>
-                                    <i class='bx bx-plus'>THÊM</i>
-                                </Button>
-                                <Add show={addModal} onHide={() => setAddModal(false)}/>
-                            </li>
-                            <li className='nav-items' >
-                                <div className="search-form">
-                                    <label className="form-label">Chọn ngày</label>
-                                    <input type="datetime-local" className="dateform form-control" placeholder="Nhập ngày"></input>
-                                </div>
-                            </li>
-                            <li className='nav-items' >
-                                <div className="search-form">
-                                    <label>Số hồ sơ cũ</label>
-                                    <input type="text" className="sohosocu form-control" ></input>
-                                </div>
-                            </li>
-                            <li className='nav-items' >
-                                <div className="search-form">
-                                    <label>Số hồ sơ</label>
-                                    <input type="text" className="sohoso form-control" ></input>
-                                </div>
-                            </li>
-                            <li className='nav-items' >
-                                <div className="search-form">
-                                    <label>Điện thoại</label>
-                                    <input type="tel" 
-                                    className="dienthoai form-control" 
-                                    value={searchTelQuery}
-                                    onChange={(e) => setSearchTelQuery(e.target.value)}
-                                    ></input>
-                                </div>
-                            </li>
-                            <li className='nav-items' >
-                                <div className="search-form">
-                                    <label>Họ tên</label>
-                                    <input type="text" 
-                                    className="hoten form-control" 
-                                    value={searchNameQuery}
-                                    onChange={(e) => setSearchNameQuery(e.target.value)}
-                                    ></input>
-                                </div>
-                            </li>
-                            <li className='nav-items' >
-                                <Button className="clickbutton" variant="primary" onClick={handleFilter}>
-                                    <i class='bx bx-search'>TÌM KIẾM</i>
-                                </Button>
-                                {/* <Add show={deleteModal} onHide={() => setDeleteModal(false)}/> */}
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-                <hr/>
-                <div className="table-responsive">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Các nút</th>
-                                <th>Số hồ sơ</th>
-                                <th>Họ tên</th>
-                                <th>Tuổi</th>
-                                <th>Giới tính</th>
-                                <th>Điện thoại</th>
-                                <th>Địa chỉ</th>
-                                <th>Lý do khám</th>
-                                <th>Ngày nhập</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {/* <tr> */}
-                                {data.map((item) => (
-                                    <tr key={item._id} onDoubleClick={()=>handleRowDoubleClick(item.idnumber)}>
-                                        {/* {JSON.stringify(item)} */}
-                                        <td>
-                                            <Button className="editbutton" variant="primary" onClick={()=> setEditModal(true)}>
-                                                SỬA
-                                            </Button>
-                                            <Edit show={editModal}  onHide={() => setEditModal(false)} idnumber={item.idnumber} />
-
-                                            <Button className="deletebutton" variant="danger" onClick={()=>setDeleteModal(true)}>
-                                                XÓA
-                                            </Button>
-                                            <Delete show={deleteModal} onHide={() => setDeleteModal(false)} idnumber={item.idnumber} />
-
-                                            <Button variant="warning">
-                                                GỬI THÔNG BÁO
-                                            </Button>
-                                        </td>
-                                        <td>{item.idnumber}</td>
-                                        <td>{item.name}</td>
-                                        <td>{item.age}</td>
-                                        <td>{item.gender}</td>
-                                        <td>{item.telephone}</td>
-                                        <td>{item.address}</td>
-                                        <td>{item.reason}</td>
-                                        <td>{item.input_date}</td>
-                                    </tr>
-                                ))}
-                            {/* </tr> */}
-                        </tbody>
-                    </table>
-                    
-                </div>
-               
-            </div>
-        </div>
+        
 
     </div>)
 }

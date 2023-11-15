@@ -1,22 +1,32 @@
-.Sidebar {
+/* .Sidebar {
     height: 100%;
-    width: 250px;
+    /* width: 250px; 
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     top: 0;
     left: 0;
-    background-color: #111;
+    /* background-color: #111; 
     overflow-x: hidden;
     padding-top: 20px;
-  }
+    
+  } */
 
 .PatientInfo {
-    margin-left: 250px;
+    margin-top: 20px;
+}
+/* 
+.PatientInfo .container-fluid {
+  display: flex;
+  /* justify-content: space-around; 
+} */
+
+
+.PatientInfo .btnmenu {
+  position: absolute;
 }
 
-.tab-content h3 {
-  margin-top: 20px;
-}
+/* .PatientInfo .clickbutton */
+
 
 
 .search-form {
@@ -25,15 +35,17 @@
 }
 
 .clickbutton {
+  
   margin-left: 30px;
   margin-top:20px;
   background-color: aquamarine;
   border-style: none;
   color: #111;
+  
 }
 
 .form-control {
-  width: 160px;
+  width: 140px;
 }
 
 .thong-tin-benh-nhan {
@@ -41,26 +53,15 @@
   border-style: groove;
   padding-bottom: 12px;
 }
-/* 
-.Treatment .form-control {
-  width: 230px;
-}
-.Treatment .sohoso .form-control {
-  width:150px;
-}
-.Treatment .hoten .form-control {
-  width:300px;
+
+.Treatment {
+  margin-top: 10px;
 }
 
-.Treatment .gioitinh .form-control {
-  width:100px;
+.Treatment .btnmenu {
+  position: absolute;
 }
-.Treatment .tuoi .form-control {
-  width:50px;
-}
-.Treatment .diachi .form-control {
-  width:500px;
-} */
+
 .Treatment .gioitinh .form-control {
   width: 100px;
 }
@@ -90,4 +91,19 @@
 
 .Treatment .chandoan .form-control{
   width: 400px;
+}
+
+.Treatment .ngaykham {
+  width: 13%;
+  float: left;
+  padding: 5px;
+}
+
+.Treatment .thongtinkhac {
+  width: 86%;
+  float: right;
+}
+
+.Sidebar .nav-item:hover {
+  background-color: antiquewhite;
 }

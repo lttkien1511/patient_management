@@ -12,6 +12,7 @@
     width: 50%;
     float: left;
     padding: 5px;
+    /* height:300px; */
 }
 
 
@@ -22,3 +23,31 @@
 .thuthuatdieutri th {
     text-align: center;
 }
+
+.thuthuatdieutri .thuthuatbutton {
+    margin-right: 5px;
+}
+
+.thuthuatdieutri .refreshbutton {
+    float: right;
+}
+
+.thuthuatdieutri .table-wrapper {
+    max-height: 300px;
+    overflow: auto;
+    /* display: inline-block; */
+}
+
+.thuthuatdieutri .card {
+    position: absolute;
+    background-color: #383838;
+    /* border-radius: 5px;  */
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+}
+
+/* .thuthuatdieutri .card ul li:hover  {
+    cursor: pointer;
+    background-color: aqua;
+} */

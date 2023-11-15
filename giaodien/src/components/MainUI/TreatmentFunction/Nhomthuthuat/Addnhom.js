@@ -13,7 +13,9 @@ function Addnhom(props) {
     const [add, setAdd] = useState(nhomthuthuat);
 
     const handleAdd = (e) => {
+        // console.log(e.target.value);
         setAdd({...add, [e.target.name]: e.target.value});
+        
     };
 
     const handleSubmit = (e) => {
@@ -73,11 +75,14 @@ function Addnhom(props) {
                 <label htmlFor='nhomthuthuat' className='form-label'>Nhập nhóm thủ thuật mới</label>
                 <input type='text'
                 className="form-control"
-                id='ten_nhom_thu_thuat'
+                // id='ten_nhom_thu_thuat'
                 name='ten_nhom_thu_thuat'
                 value={add.ten_nhom_thu_thuat}
                 onChange={handleAdd}
+                //autoFocus
                 />
+
+                {/* <input></input> */}
             </Modal.Body>
 
             <Modal.Footer>

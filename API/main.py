@@ -24,6 +24,7 @@ patient = db['benh_nhan']
 nhomthuthuat = db['nhom_thu_thuat']
 thuthuat = db['thu_thuat']
 thuthuattungbenhnhan = db['thu_thuat_tung_benh_nhan']
+donthuoc = db['don_thuoc']
 
 
 
@@ -94,6 +95,10 @@ class thuthuatcanhan(BaseModel):
     thanh_tien: int
     don_gia:int
     so_luong: int
+
+class danhsachdonthuoc(BaseModel):
+    donthuoc: str
+    donvi: str
 
 
 
@@ -204,7 +209,10 @@ async def addpatient ( patient_data: patientInfo = Body(...)):
     randomid = patient_data.idnumber
     randomid = random.randint(100000,999999)
     birthday_date = datetime.strptime(patient_data.birthday, "%Y-%m-%d")
-    input_date = datetime.strptime(patient_data.inputdate, "%Y-%m-%d")
+    
+    input_date = datetime.now()
+    homnay = input_date.strftime("%Y-%m-%d")
+    #input_date = datetime.strptime(patient_data.inputdate, "%Y-%m-%d")
     #input_date = date()
     #updated_checkbox = []
     medicalhistory = patient_data.medical_history
@@ -217,7 +225,8 @@ async def addpatient ( patient_data: patientInfo = Body(...)):
 
     for history in checkboxes:
         history_state[history] = history in medicalhistory
-    
+    # ngay = datetime.now()
+    # homnay=ngay.strftime("%d/%m/%Y")
     patient_data = {
         "name": patient_data.name,
         "age": patient_data.age,
@@ -227,7 +236,8 @@ async def addpatient ( patient_data: patientInfo = Body(...)):
         "reason": patient_data.reason,
         "email": patient_data.email,
         "birthday": birthday_date,
-        "input_date":input_date,
+        #"input_date":input_date,
+        'input_date': homnay,
         "medical_history":medicalhistory,
         "idnumber": randomid
         
@@ -238,21 +248,21 @@ async def addpatient ( patient_data: patientInfo = Body(...)):
 @app.post("/filter/")
 async def filter_data(patientdata: dict = Body(...)):
     # input: {
-    #     page:1,
-    #     limit:10,
-    #     filter_type: "and/or",
-    #     sort_field:"name",
-    #     sort_direct:"-1",
-    #     condition: {
-    #         "telephone": {
-    #             "logic":"=",
-    #             "value": "01232345345"
-    #         },
-    #         "name": {
-    #             "logic":"like",
-    #             "value": "kien"
-    #         }
-    #     }
+        # page:1,
+        # limit:10,
+        # filter_type: "and/or",
+        # sort_field:"name",
+        # sort_direct:"-1",
+        # condition: {
+        #     "telephone": {
+        #         "logic":"=",
+        #         "value": "01232345345"
+        #     },
+        #     "name": {
+        #         "logic":"like",
+        #         "value": "kien"
+        #     }
+        # }
     # }
     # return {
     #     data:[],
@@ -294,21 +304,7 @@ async def filter_data(patientdata: dict = Body(...)):
     }
 
 
-# @app.patch("/update")
-# async def updatedata(idnumber: int, patientdata: dict = Body(...)):
-#     document = patient.find_one({"idnumber":idnumber})
-#     for key,value in patientdata.items():
-#         document[key] = value
-#     patient.save(document)
 
-# @app.patch("/update")
-# async def updatedata(idnumber: int, patientdata: patientInfo = Body(...)):
-#     stored_item_data = patient[idnumber]
-#     stored_item_model = patientdata(**stored_item_data)
-#     update_data = patientdata.dict(exclude_unset=True)
-#     updated_item = stored_item_model.copy(update=update_data)
-#     patient[idnumber] = jsonable_encoder(updated_item)
-#     return updated_item
 
 @app.patch("/update")
 async def updatedata(idnumber: int, patientdata: patientInfo = Body(...)):
@@ -563,28 +559,120 @@ async def thuthuatbenhnhan( idnumber: int, item: thuthuatcanhan = Body(...)):
     
 
 
-@app.get("/getthuthuatbenhnhan/{idnumber}")
-async def getthuthuatbenhnhan(idnumber: int):
-    #ten_thu_thuat, so_luong, don_gia, thanh_tien, ngaykham
-    idbenhnhan = thuthuattungbenhnhan.find_one({"idnumber": idnumber})
+# @app.get("/getthuthuatbenhnhan/{idnumber}")
+# async def getthuthuatbenhnhan(idnumber: int):
+#     #ten_thu_thuat, so_luong, don_gia, thanh_tien, ngaykham
+#     idbenhnhan = patient.find_one({"idnumber": idnumber})
+#     if idbenhnhan is None:
+#         return {"message": "Benh nhan khong tim thay"}
+#     print(idbenhnhan)
+#     id = idbenhnhan['idnumber']
+#     thuthuatcanhan = thuthuattungbenhnhan.find({"idnumber": id},{
+#         "_id": 1,
+#         "ten_thu_thuat": 1,
+#         "so_luong":1,
+#         "don_gia":1,
+#         "thanh_tien":1,
+#         "ngaykham": 1
+#     })
+#     if thuthuatcanhan is None:
+#         return {"message": "data not found"}
+    
+#     thuthuatcanhan = [doc for doc in thuthuatcanhan]
+#     for canhan in thuthuatcanhan:
+#         canhan['_id'] = str(canhan['_id'])
+
+#     return thuthuatcanhan
+
+@app.get("/ngaykham/{idnumber}")
+async def ngaykham(idnumber: int):
+    idbenhnhan = patient.find_one({"idnumber": idnumber})
     if idbenhnhan is None:
         return {"message": "Benh nhan khong tim thay"}
-    print(idbenhnhan)
-    id = idbenhnhan['idnumber']
-    thuthuatcanhan = thuthuattungbenhnhan.find({"idnumber": id},{
-        "_id": 1,
-        "ten_thu_thuat": 1,
-        "so_luong":1,
-        "don_gia":1,
-        "thanh_tien":1,
-        "ngaykham": 1
-    })
-    if thuthuatcanhan is None:
-        return {"message": "data not found"}
     
-    thuthuatcanhan = [doc for doc in thuthuatcanhan]
-    for canhan in thuthuatcanhan:
-        canhan['_id'] = str(canhan['_id'])
+    id = idbenhnhan['idnumber']
+    thuthuatcanhan = thuthuattungbenhnhan.distinct("ngaykham",{"idnumber":id})
+    print(thuthuatcanhan)
+    thuthuatcanhan_unique = [{"ngaykham":value} for value in thuthuatcanhan]
 
-    return thuthuatcanhan
 
+    print(thuthuatcanhan_unique)
+    return thuthuatcanhan_unique
+
+
+@app.post("/filtertheongay/")
+async def filtertheongay(info :dict = Body(...)):
+# input: {
+#     "filter_type": "and",
+#     "condition": {
+#         "idnumber": {
+#             "logic": "=",
+#             "value": 611488
+#         },
+#         "ngaykham": {
+#             "logic": "=",
+#             "value": "07/11/2023"
+#         }
+#     }
+# }
+# return {
+#     data: []
+# }
+
+    filtercondition = {}
+    if info.get("filter_type","and") == "and":
+        for col in info['condition']:
+            if (info['condition'][col]['logic'] == "="):
+                if col == "idnumber":
+                    filtercondition[col] = int(info["condition"][col]['value'])
+                else:
+                    filtercondition[col] = info['condition'][col]['value']
+    print(filtercondition)
+    data = thuthuattungbenhnhan.find(filtercondition,{
+        
+        "thuthuatid":0,
+        })
+    data = list(data)
+    print(data)
+    for item in data:
+        item["_id"] = str(item["_id"])
+    return {"data":data}
+
+@app.delete('/xoanhomthuthuat')
+async def xoanhomthuthuat(id:str):
+    nhom = nhomthuthuat.find_one({"_id": ObjectId(id)})
+    if nhom is None:
+        return {"message": "Khong tim thay nhom thu thuat"}
+    #print(nhom)
+    nhomcanxoa = nhom['_id']
+    #print(nhomcanxoa)
+    
+    nhomthuthuat.delete_one({"_id":nhomcanxoa})
+    thuthuat.delete_many({"thuthuatid":nhomcanxoa})
+    
+    return {"message": "Xoa nhom thu thuat thanh cong"}
+
+@app.delete('/xoathuthuat')
+async def xoathuthuat(id:str):
+    tt  = thuthuat.find_one({"_id":ObjectId(id)})
+    if tt is None:
+        return {"message": "Khong tim thay thu thuat"}
+    ttcanxoa = tt['_id']
+    thuthuat.delete_one({"_id":ttcanxoa})
+    return {"message": "Xoa thu thuat thanh cong"}
+
+@app.post('/donthuoc')
+async def donthuocmoi(dt_list :List[danhsachdonthuoc] = Body(...)):
+    new_donthuoc_list = []
+    for dt in dt_list:
+        newdonthuoc = {
+            "ten_thuoc": dt.donthuoc,
+            "don_vi": dt.donvi
+        }
+        new_donthuoc_list.append(newdonthuoc)
+
+    dtn = donthuoc.insert_many(new_donthuoc_list)
+
+    
+
+    return {"message":"don thuoc moi da duoc them vao"}

@@ -1,16 +1,17 @@
 import React, { useState, useEffect} from "react";
 import  Modal  from 'react-bootstrap/Modal';
-import "./thuthuat.css";
+//import "./thuthuat.css";
+//import "../TreatmentFunction/thuthuat.css";
 import Button from "react-bootstrap/esm/Button";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import Addnhom from "./Nhomthuthuat/Addnhom";
-import Addthuthuat from "./Nhomthuthuat/Addthuthuat";
+import Addnhom from "../TreatmentFunction/Nhomthuthuat/Addnhom";
+import Addthuthuat from "../TreatmentFunction/Nhomthuthuat/Addthuthuat";
 
 
 
-function Thuthuat (props) {
+function ProcedureGroup (propdata) {
     
     const [data, setData] = useState([]);
     const {idnumber} = useParams();
@@ -202,26 +203,24 @@ function Thuthuat (props) {
 
 
     return (
-    <Modal {...props} className="container-fluid thuthuatdieutri">
+    <Modal {...propdata} className="container-fluid thuthuatdieutri">
         <Modal.Header>
             <Modal.Title>
-                CHỌN THỦ THUẬT ĐIỀU TRỊ
+                DANH SÁCH NHÓM THỦ THUẬT ĐIỀU TRỊ
             </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
             <div className="nhomthuthuat">
-                
+                {/* <input placeholder="fwef" autoFocus></input> */}
+                {/* <input placeholder="sldkfj"></input> */}
                 <Button className="thuthuatbutton" variant="primary" onClick={() => setAddnhomthuthuat(true)}>
-                    <i class='bx bx-plus'>THÊM</i>
+                    <i className='bx bx-plus'>THÊM</i>
                 </Button>
                 <Addnhom show={addnhomthuthuat} onHide={() => setAddnhomthuthuat(false)}/>
                 <Button className="thuthuatbutton" variant="primary">
                     SỬA
                 </Button>
-                {/* <Button className="thuthuatbutton" variant="danger" >
-                    XÓA
-                </Button> */}
                 <Button className="refreshbutton" variant="primary" onClick={refreshnhomthuthuat}>
                     REFRESH
                 </Button>
@@ -326,66 +325,16 @@ function Thuthuat (props) {
                     </table>
                 </div>
             </div>
-            <div className="thuthuatduocchon">
-                <table className="table table-bordered" >
-                    <thead>
-                        <tr>
-                            <th colSpan="7">THỦ THUẬT ĐƯỢC LỰA CHỌN</th>
-                        </tr>
-                        <tr>
-                            <th>STT</th>
-                            <th>TÊN THỦ THUẬT</th>
-                            <th>SỐ LƯỢNG</th>
-                            <th>ĐƠN GIÁ</th>
-                            <th>THÀNH TIỀN</th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                        {thuthuatchosen ? (
-                            thuthuatchosen.map((item, index) => {
-                            let totalPrice = item.so_luong > 0 ? item.don_gia * item.so_luong : 0;
-                            console.log(item)
-                            return (
-                            <tr key={index}>
-                                <td></td>
-                                <td>{item.ten_thu_thuat}</td>
-                                <td>
-                                    <input 
-                                    type='number'
-                                    name="so_luong"
-                                    //value={soluong}
-                                    value = {item.so_luong}
-                                    onChange={(e)=>{
-                                        let val = e.target.value
-                                        item.so_luong = val
-                                        setThuthuatchosen([...thuthuatchosen])
-                                        setSoluong(val)
-                                    }}
-                                    />
-                                </td>
-                                <td>{item.don_gia}</td>
-                                <td>
-                                    {totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} 
-                                    {/* {item.thanh_tien} */}
-                                </td>
-                                
-                            </tr>
-                        );}) ):null
-                        }
-                    </tbody>
-                </table>
-            </div>
+            
             
         </Modal.Body>
 
         <Modal.Footer>
-            <button type="submit" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleSave}>LƯU</button> 
-            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={props.onHide}>ĐÓNG LẠI</button>
+            {/* <button type="submit" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleSave}>LƯU</button>  */}
+            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={propdata.onHide}>ĐÓNG LẠI</button>
         </Modal.Footer>
     </Modal>
 )}
 
 
-export default Thuthuat
+export default ProcedureGroup
