@@ -1,47 +1,27 @@
-/* .Sidebar {
-    height: 100%;
-    /* width: 250px; 
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    /* background-color: #111; 
-    overflow-x: hidden;
-    padding-top: 20px;
-    
-  } */
-
 .PatientInfo {
-    margin-top: 20px;
+    margin-top: 10px;
 }
-/* 
-.PatientInfo .container-fluid {
+
+.PatientInfo .d-flex {
   display: flex;
-  /* justify-content: space-around; 
-} */
-
-
-.PatientInfo .btnmenu {
-  position: absolute;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* .PatientInfo .clickbutton */
-
-
+.PatientInfo .d-flex .NotiList {
+  display: flex;
+}
 
 .search-form {
   padding-left: 30px;
-  /* margin-left: 60px; */
 }
 
 .clickbutton {
-  
   margin-left: 30px;
   margin-top:20px;
   background-color: aquamarine;
   border-style: none;
   color: #111;
-  
 }
 
 .form-control {
@@ -56,11 +36,32 @@
 
 .Treatment {
   margin-top: 10px;
+  
 }
 
-.Treatment .btnmenu {
-  position: absolute;
+.Treatment .d-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+
+.Treatment .d-flex .NotiList {
+  display: flex;
+}
+
+.Treatment .btnmenu-2 {
+  margin-top: 2px;
+  margin-right: 5px;
+}
+
+.Treatment .btnmenu-1:hover {
+  background-color: antiquewhite;
+}
+.Treatment .btnmenu-2:hover {
+  background-color: antiquewhite;
+}
+
+
 
 .Treatment .gioitinh .form-control {
   width: 100px;
@@ -93,17 +94,101 @@
   width: 400px;
 }
 
-.Treatment .ngaykham {
-  width: 13%;
-  float: left;
-  padding: 5px;
-}
-
-.Treatment .thongtinkhac {
-  width: 86%;
-  float: right;
-}
-
 .Sidebar .nav-item:hover {
   background-color: antiquewhite;
 }
+
+.Treatment .chi-tiet-kham-benh .header {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: space-between;
+}
+.Treatment .chi-tiet-kham-benh .header .button {
+  float: right;
+} 
+
+.Treatment .tablengaykham .table-wrapper {
+  overflow: auto;
+  display: inline-block;
+}
+
+.Treatment .tablengaykham .table-wrapper table {
+  /* width: 100%; */
+  table-layout: fixed;
+  width: 150px;
+}
+
+.Treatment .tablengaykham .table-wrapper .tbody-wrapper {
+  height: 180px;
+  overflow-y: auto;
+}
+
+.Treatment .tablengaykham .table-wrapper-2 {
+  overflow: auto;
+  display: inline-block;
+}
+
+.Treatment .tablengaykham .table-wrapper-2 table {
+  table-layout: fixed;
+}
+
+.Treatment .tablengaykham .table-wrapper-2 .tbody-wrapper {
+  height: 180px;
+  overflow: auto;
+}
+
+
+
+.Treatment .tablengaykham {
+  justify-content: space-between;
+  display: flex;
+}
+
+.Treatment .table-wrapper-2 .rang {
+  width: 100px;
+}
+
+.Treatment .table-wrapper-2 .tenthuthuat {
+  width: 200px;
+}
+
+.Treatment .table-wrapper-2 .noidungthuthuat {
+  width: 200px;
+}
+
+.Treatment .table-wrapper-2 .soluong {
+  width: 100px;
+}
+
+.Treatment .table-wrapper-2 .dongia {
+  width: 150px;
+}
+
+.Treatment .table-wrapper-2 .thanhtien {
+  width: 150px;
+}
+
+.Treatment .table-wrapper-2 .percent {
+  width: 100px;
+}
+
+.Treatment .table-wrapper-2 .giamgia {
+  width: 100px;
+}
+
+.Treatment .table-wrapper-2 .lydogiam {
+  width: 100px;
+}
+
+.Treatment .footertest {
+  flex-direction: column;
+  bottom: 0;
+  /* text-align: center; */
+  position: fixed;
+  height:130px;
+  width: 100%;
+  /* background-color: rgb(246, 248, 209); */
+
+}
+

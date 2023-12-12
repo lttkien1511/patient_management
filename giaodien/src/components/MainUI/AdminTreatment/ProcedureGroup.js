@@ -4,7 +4,7 @@ import  Modal  from 'react-bootstrap/Modal';
 //import "../TreatmentFunction/thuthuat.css";
 import Button from "react-bootstrap/esm/Button";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+//import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import Addnhom from "../TreatmentFunction/Nhomthuthuat/Addnhom";
 import Addthuthuat from "../TreatmentFunction/Nhomthuthuat/Addthuthuat";
@@ -14,17 +14,17 @@ import Addthuthuat from "../TreatmentFunction/Nhomthuthuat/Addthuthuat";
 function ProcedureGroup (propdata) {
     
     const [data, setData] = useState([]);
-    const {idnumber} = useParams();
+    //const {idnumber} = useParams();
     const [thuthuatdata, setThuthuatdata] = useState([]);
     const [thuthuatchosen, setThuthuatchosen] = useState([]);
     
-    const [soluong, setSoluong] = useState("");
+    //const [soluong, setSoluong] = useState("");
     const [thuthuatid, setThuthuatid] = useState("");
-    const [ten_thu_thuat, setTenthuthuat] = useState("");
+    //const [ten_thu_thuat, setTenthuthuat] = useState("");
     
 
-    const [don_gia, setDongia] =useState(0);
-    const [thanh_tien, setThanhtien]= useState(0);
+    //const [don_gia, setDongia] =useState(0);
+    //const [thanh_tien, setThanhtien]= useState(0);
 
     const [addnhomthuthuat, setAddnhomthuthuat] = useState(false);
     const [addthuthuat, setAddthuthuat] = useState(false);
@@ -41,7 +41,7 @@ function ProcedureGroup (propdata) {
 
     const handleContextMenuNhomThuthuat = (e, item) => {
         e.preventDefault();
-        setClickednhomthuthuat(true);
+        setClickednhomthuthuat(item._id);
         setPoints({ x: e.pageX, y: e.pageY });
         console.log('Right Click', e.pageX, e.pageY);
         console.log('Item info:', item);
@@ -49,7 +49,7 @@ function ProcedureGroup (propdata) {
 
     const handleContextMenuThuthuat = (e, item) => {
         e.preventDefault();
-        setClickthuthuat(true);
+        setClickthuthuat(item._id);
         setPoints({ x: e.pageX, y: e.pageY });
         console.log('Right Click', e.pageX, e.pageY);
         console.log('Item info:', item);
@@ -109,41 +109,6 @@ function ProcedureGroup (propdata) {
         })
     }
 
-    const handleSave = () => {
-        let data = JSON.stringify({
-            "so_luong": soluong,
-            "thuthuatid": thuthuatid,
-            "ten_thu_thuat": ten_thu_thuat,
-            "don_gia": don_gia,
-            "thanh_tien": thanh_tien
-        });      
-        let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: `http://127.0.0.1:8000/thuthuatbenhnhan/${idnumber}`,
-        headers: { 
-            'Content-Type': 'application/json'
-        },
-        
-        data: data
-        };
-        
-        axios.request(config)
-        .then((response) => {
-        const savedata = response.data;
-        console.log(JSON.stringify(savedata));
-        //setData(savedata.data);
-        Swal.fire({
-            icon: 'success',
-            title: 'Thủ thuật mới cho bệnh nhân đã được thêm vào',
-            showConfirmButton:false,
-            timer:2000
-        })
-        })
-        .catch((error) => {
-        console.log(error);
-        });
-    }
 
     const refreshnhomthuthuat = () => {
         axios
@@ -185,6 +150,8 @@ function ProcedureGroup (propdata) {
         console.error('Error when fetching group details: ', error);
         });
       };
+
+    
     
     const handleChoosing = (chosenitem) => {
         console.log(chosenitem);
@@ -217,7 +184,7 @@ function ProcedureGroup (propdata) {
                 <Button className="thuthuatbutton" variant="primary" onClick={() => setAddnhomthuthuat(true)}>
                     <i className='bx bx-plus'>THÊM</i>
                 </Button>
-                <Addnhom show={addnhomthuthuat} onHide={() => setAddnhomthuthuat(false)}/>
+                <Addnhom show={addnhomthuthuat} onHide={() => setAddnhomthuthuat(false)} refreshNhom={refreshnhomthuthuat}/>
                 <Button className="thuthuatbutton" variant="primary">
                     SỬA
                 </Button>
@@ -240,7 +207,8 @@ function ProcedureGroup (propdata) {
                             const nhomthuthuatId = item._id;
                             return (
                                 <tr key={item._id} 
-                                onDoubleClick={()=>handleDoubleClick(nhomthuthuatId)} 
+                                style={{cursor:"pointer"}}
+                                onClick={()=>handleDoubleClick(nhomthuthuatId)} 
                                 onContextMenu={(e) => {
                                     e.preventDefault();
                                     handleContextMenuNhomThuthuat(e,item);
@@ -249,7 +217,7 @@ function ProcedureGroup (propdata) {
                                     <td></td>
                                     <td>{item.ten_nhom_thu_thuat}</td>
 
-                                    {clickednhomthuthuat && (
+                                    {clickednhomthuthuat == item._id && (
                                         <div className="card" style={{width: "200px", top:points.y + "px", left:points.x + "px",position:"fixed"}}>
                                             <ul className="list-group list-group-flush">
                                                     <Button className="thuthuatbutton list-group-item" onClick={() => deleteNhom(nhomthuthuatId)}  >
@@ -276,9 +244,6 @@ function ProcedureGroup (propdata) {
                 <Button className="thuthuatbutton" variant="primary">
                     SỬA
                 </Button>
-                {/* <Button className="thuthuatbutton" variant="danger" >
-                    XÓA
-                </Button> */}
                 <Button className="refreshbutton" variant="primary" >
                     REFRESH
                 </Button>
@@ -299,7 +264,8 @@ function ProcedureGroup (propdata) {
                             {thuthuatdata ? (
                                 thuthuatdata.map((item) => (
                                 <tr key={item._id} 
-                                onDoubleClick={()=>handleChoosing(item._id)}
+                                style={{cursor:"pointer"}}
+                                onClick={()=>handleChoosing(item._id)}
                                 onContextMenu={(e) => {
                                     e.preventDefault();
                                     handleContextMenuThuthuat(e,item);
@@ -310,7 +276,7 @@ function ProcedureGroup (propdata) {
                                     <td>{item.ten_thu_thuat}</td>
                                     <td>{item.don_gia}</td>
                                     
-                                     {clickedthuthuat && (
+                                     {clickedthuthuat == item._id && (
                                         <div className="card" style={{width: "200px", top:points.y + "px", left:points.x + "px",position:"fixed"}}>
                                             <ul className="list-group list-group-flush">
                                                     <Button className="thuthuatbutton list-group-item" onClick={() => deleteThuthuat(item._id)}  >

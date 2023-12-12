@@ -7,11 +7,15 @@ from pymongo import MongoClient
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from pydantic import BaseModel
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from enum import Enum
 from typing import List
 #from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+#from fastapi.responses import JSONResponse
+# import pymongo
+# import schedule
+# import time
+
 
 
 
@@ -25,6 +29,9 @@ nhomthuthuat = db['nhom_thu_thuat']
 thuthuat = db['thu_thuat']
 thuthuattungbenhnhan = db['thu_thuat_tung_benh_nhan']
 donthuoc = db['don_thuoc']
+donthuoctungbenhnhan = db['don_thuoc_tung_benh_nhan']
+lichhen = db['lich_hen_tung_benh_nhan']
+notification = db['thong_bao']
 
 
 
@@ -76,9 +83,7 @@ class patientInfo(BaseModel):
     inputdate: str
     medical_history: List[str] 
     idnumber: int = None
-    
-
-    
+       
 
 class noidungthuthuat(BaseModel):
     ten_nhom_thu_thuat: str | None = None
@@ -89,16 +94,42 @@ class noidungthuthuat(BaseModel):
     so_luong: int | None = None
 
 class thuthuatcanhan(BaseModel):
+    idnumber: int | None = None
     thuthuatid: str
     ten_thu_thuat:str
-    #giam_gia:int
     thanh_tien: int
     don_gia:int
     so_luong: int
+    ngaykham: str | None = None
+
+class PersonEnum(str, Enum):
+    bsLan = "BS Lan"
+    bsMy = "BS Mỹ"
 
 class danhsachdonthuoc(BaseModel):
-    donthuoc: str
-    donvi: str
+    idnumber: int | None = None
+    donthuoc_id: str | None = None
+    donthuoc: str | None = None
+    donvi: str | None = None
+    soluong: int | None = None
+    huongdan: str | None = None
+    ngayke: str | None = None
+    nguoike: PersonEnum | None = None
+
+class lichhenchobenhnhan(BaseModel):
+    idnumber: int
+    tenbenhnhan: str | None = None
+    lich_hen: str | None = None
+    reminder_time : str | None = None
+
+class PatientNotification(BaseModel):
+    #noti_id: str | None = None
+    sendtime: str | None = None
+    idnumber: int
+    tenbenhnhan: str | None = None
+    read: bool | None = None
+    notificationType: dict | None = None
+
 
 
 
@@ -128,6 +159,7 @@ def create_session(user_id: ObjectId):
 def get_authenticated_user_from_session_id(request: Request):
     try:
         session_id = int(request.cookies.get("session_id"))
+        #session_id = request.cookies.get("session_id")
         sessionData = session.find_one({"session_id":session_id})
         if(sessionData is None): raise Exception("Invalid session id")
         userId = sessionData['user_id']
@@ -146,29 +178,6 @@ def get_session_id(request: Request):
     session_id = request.cookies.get("session_id")
     return int(session_id)
 
-
-
-
-# @app.post("/signup")
-# async def sign_up(username: str = Body(...), password: str = Body(...)):
-#     db = db_connection.co_so_du_lieu_benh_nhan
-#     collection = db['admin']
-#     user = collection.find_one({'username':username})
-#     if user:
-#         raise HTTPException(
-#             status_code=status.HTTP_409_CONFLICT,
-#             detail="Username already exists",
-#         )
-#     #new_user_id = len(users) + 1
-#     new_user = {
-#         "username": username,
-#         "password": password,
-#     }
-    
-#     userid = collection.insert_one(new_user)
-#     print(userid)
-#     return {"message": "User registered successfully"}
-    
 
 
 @app.post("/login")
@@ -381,43 +390,7 @@ async def addthuthuat(id:str,  thuthuatdata : noidungthuthuat = Body(...)):
     
     return {"message":"Thu thuat moi da duoc them vao"}
 
-# @app.get('/ten_nhom_thu_thuat')
-# async def ten_nhom_thu_thuat(nhomthuthuatid: str):
-#     nhomthuthuatid_obj = ObjectId(nhomthuthuatid)
-#     idthuthuat = thuthuat.find_one({"thuthuatid":nhomthuthuatid_obj})
-#     if idthuthuat is None:
-#             return {"message": "Thuthuat not found"}
-#     thuthuatid = idthuthuat['thuthuatid']
-#     tennhomthuthuat = thuthuat.find_one({"thuthuatid":thuthuatid},{
-#         "ten_thu_thuat":0,
-#         "don_gia":0,
-#         "giam_gia":0
-#     })
-#     return tennhomthuthuat
-# @app.get('/ten_nhom_thu_thuat')
-# async def ten_nhom_thu_thuat(nhomthuthuatid: str):
-#     try:
-#         nhomthuthuatid_obj = ObjectId(nhomthuthuatid)
-#         idthuthuat = thuthuat.find_one({"thuthuatid": nhomthuthuatid_obj})
-        
-#         if idthuthuat is None:
-#             return {"message": "Thuthuat not found"}
-        
-#         thuthuatid = idthuthuat['thuthuatid']
-#         tennhomthuthuat = thuthuat.find_one({"thuthuatid": thuthuatid},{
-#             "_id":0,
-#             "ten_thu_thuat":0,
-#             "don_gia":0,
-#             "giam_gia":0
-#         })
-#         if tennhomthuthuat:
-#             tennhomthuthuat["thuthuatid"] = str(tennhomthuthuat["thuthuatid"])  
-            
-        
-#         return tennhomthuthuat
-#     except Exception as e:
-#         return {"message": f"An error occurred: {str(e)}"}
-#Lưu ý: phải convert từ ObjectId về lại String
+
 
 @app.get("/getallnhomthuthuat")
 async def getallnhomthuthuat():
@@ -472,7 +445,7 @@ async def thuthuatduocluachon(id:str):
         #print(idthuthuat)
         thuthuatid = idthuthuat['_id']
         tenthuthuat = thuthuat.find({"_id": thuthuatid},{
-            "_id":0,
+            "_id":1,
             "ten_thu_thuat":1,
             "don_gia":1,
             "giam_gia":1
@@ -481,6 +454,8 @@ async def thuthuatduocluachon(id:str):
             raise HTTPException(status_code=404, detail="Thuthuat data not found")
 
         tenthuthuat = [doc for doc in tenthuthuat]
+        for i in tenthuthuat:
+            i['_id'] = str(i['_id'])
         #print(tenthuthuat)
         return tenthuthuat
 
@@ -488,101 +463,26 @@ async def thuthuatduocluachon(id:str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-# @app.post("/tinhtoanthuthuat")
-# async def tinhtoanthuthuat(id:str, patientitem: patientInfo = Body(...), item: noidungthuthuat = Body(...)):
-#     try:
-#         thuthuatid_obj = ObjectId(id)
-#         idthuthuat = thuthuat.find_one({"_id":thuthuatid_obj})
-
-#         if idthuthuat is None:
-#             return {"message": "Thu thuat not found"}
-#         #print(idthuthuat)
-#         thuthuatid = idthuthuat['_id']
-#         tenthuthuat = thuthuat.find_one({"_id":thuthuatid})
-#         print(tenthuthuat)
-#         if tenthuthuat:
-#             soluong = item.so_luong
-#             dongia = tenthuthuat['don_gia']
-#             thanhtien = dongia * soluong
-
-#             newdata = {
-#                 "ten_thu_thuat": tenthuthuat['ten_thu_thuat'],
-#                 "don_gia": dongia,
-#                 "so_luong": soluong,
-#                 "thanh_tien": thanhtien
-#             }
-
-#             thuthuatupdate = thuthuattungbenhnhan.insert_one(newdata)
-            
-#             return {"message": "success"}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
-    
-
 @app.post("/thuthuatbenhnhan/{idnumber}")
-async def thuthuatbenhnhan( idnumber: int, item: thuthuatcanhan = Body(...)):
+async def thuthuatbenhnhan( idnumber: int, items:List[thuthuatcanhan] = Body(...)):
     idbenhnhan = patient.find_one({"idnumber":idnumber})
     if idbenhnhan is None:
         return {"message": "benh nhan khong tim thay"}
-    
-    thuthuatid = item.thuthuatid
-    thuthuatid_obj = ObjectId(thuthuatid)
-    idthuthuat = thuthuat.find_one({"_id":thuthuatid_obj})
-    if idthuthuat is None:
-        return {"message": "Thu thuat not found"}
-    
-    idbenhnhan = idbenhnhan['idnumber']
-    thuthuatid = idthuthuat['_id']
-    tenthuthuat = thuthuat.find_one({"_id":thuthuatid})
-    ngay = datetime.now()
-    homnay=ngay.strftime("%d/%m/%Y")
-    #print(tenthuthuat)
-    if tenthuthuat:
-        soluong = item.so_luong
-        dongia = tenthuthuat['don_gia']
-        thanhtien = dongia * soluong
-        newdata = {
-            "thuthuatid": thuthuatid,
-            "idnumber": idbenhnhan,
-            "ten_thu_thuat": tenthuthuat['ten_thu_thuat'],
-            "don_gia": dongia,
-            "so_luong": soluong,
-            "thanh_tien": thanhtien,
-            "ngaykham": homnay
-        }
-        
-        thuthuatupdate = thuthuattungbenhnhan.insert_one(newdata)
-        
-        print(newdata)
-        
-        return {"message": "success"}
-    
+    newRecords = []
+    for item in items:
+        item.ngaykham = datetime.now().strftime("%d/%m/%Y")
+        item.idnumber = idbenhnhan['idnumber']
+        thuthuatid = item.thuthuatid
+        isExit:dict = thuthuattungbenhnhan.find_one({"idnumber": idnumber, "thuthuatid": thuthuatid})
+        if(isExit is None):
+            newRecords.append(item.__dict__)
+        else:
+            thuthuattungbenhnhan.update_one({"_id":isExit['_id']}, {"$set":item.__dict__})
+    if(len(newRecords) > 0):
+        thuthuattungbenhnhan.insert_many(newRecords)
+    print(newRecords)
+    return {"message": "success"}
 
-
-# @app.get("/getthuthuatbenhnhan/{idnumber}")
-# async def getthuthuatbenhnhan(idnumber: int):
-#     #ten_thu_thuat, so_luong, don_gia, thanh_tien, ngaykham
-#     idbenhnhan = patient.find_one({"idnumber": idnumber})
-#     if idbenhnhan is None:
-#         return {"message": "Benh nhan khong tim thay"}
-#     print(idbenhnhan)
-#     id = idbenhnhan['idnumber']
-#     thuthuatcanhan = thuthuattungbenhnhan.find({"idnumber": id},{
-#         "_id": 1,
-#         "ten_thu_thuat": 1,
-#         "so_luong":1,
-#         "don_gia":1,
-#         "thanh_tien":1,
-#         "ngaykham": 1
-#     })
-#     if thuthuatcanhan is None:
-#         return {"message": "data not found"}
-    
-#     thuthuatcanhan = [doc for doc in thuthuatcanhan]
-#     for canhan in thuthuatcanhan:
-#         canhan['_id'] = str(canhan['_id'])
-
-#     return thuthuatcanhan
 
 @app.get("/ngaykham/{idnumber}")
 async def ngaykham(idnumber: int):
@@ -627,13 +527,13 @@ async def filtertheongay(info :dict = Body(...)):
                     filtercondition[col] = int(info["condition"][col]['value'])
                 else:
                     filtercondition[col] = info['condition'][col]['value']
-    print(filtercondition)
+    #print(filtercondition)
     data = thuthuattungbenhnhan.find(filtercondition,{
         
         "thuthuatid":0,
         })
     data = list(data)
-    print(data)
+    #print(data)
     for item in data:
         item["_id"] = str(item["_id"])
     return {"data":data}
@@ -672,7 +572,358 @@ async def donthuocmoi(dt_list :List[danhsachdonthuoc] = Body(...)):
         new_donthuoc_list.append(newdonthuoc)
 
     dtn = donthuoc.insert_many(new_donthuoc_list)
+    return {"message":"don thuoc moi da duoc them vao"}
+
+@app.post('/motdonthuoc')
+async def motdonthuoc(dt: danhsachdonthuoc = Body(...)):
+    donthuoconly = {
+        "ten_thuoc":dt.donthuoc,
+        "don_vi":dt.donvi
+    }
+    donthuoc.insert_one(donthuoconly)
+    return {"message":"don thuoc moi da duoc them vao"}
+
+@app.get('/danhsachtoanbodonthuoc')
+async def danhsachdonthuocdata():
+    danhsach = list(donthuoc.find({},{
+        "_id":1,
+        "donthuoc":1,
+        "donvi":1
+    }))
+    for id in danhsach:
+        id["_id"] = str(id["_id"])
+    return danhsach
+
+@app.delete('/xoadonthuoc')
+async def xoanhomthuthuat(id:str):
+    nhom = donthuoc.find_one({"_id": ObjectId(id)})
+    if nhom is None:
+        return {"message": "Khong tim thay nhom thu thuat"}
+    nhomcanxoa = nhom['_id']
+    donthuoc.delete_one({"_id":nhomcanxoa})
+    return {"message": "Xoa don thuoc thanh cong"}
+
+@app.get('/donthuocduocchon/{id}')
+async def donthuocduocchon(id:str):
+    donthuocid = donthuoc.find_one({"_id": ObjectId(id)})
+    if donthuocid is None:
+        return {"message": "Khong tim thay don thuoc"}
+    iddonthuoc = donthuocid['_id']
+    thongtin = donthuoc.find({"_id":iddonthuoc},{
+        "_id":1,
+        "don_vi":0
+    })
+    thongtinthuoc = [doc for doc in thongtin]
+    for i in thongtinthuoc:
+        i['_id'] = str(i['_id'])
+    return thongtinthuoc
+
+
+
+#Lưu lại đơn thuốc của bệnh nhân theo ngày và người kê thuốc
+@app.post("/donthuocbenhnhan/{idnumber}")
+async def donthuocbenhnhan(idnumber: int, items: List[danhsachdonthuoc]  = Body(...)):
+    idbenhnhan = patient.find_one({"idnumber":idnumber})
+    if idbenhnhan is None:
+        return {"message": "Khong tim thay benh nhan"}
+    newRecords = []
+    for item in items:
+        #item.ngayke = datetime.strptime(item.ngayke, "%d/%m/%Y").strftime("%d/%m/%Y")
+        item.ngayke = datetime.now().strftime("%d/%m/%Y")
+        item.idnumber = idbenhnhan['idnumber']
+        donthuocid = item.donthuoc_id
+        if item.nguoike == PersonEnum.bsLan:
+            nguoike_str = "BS Lan"
+        elif item.nguoike == PersonEnum.bsMy:
+            nguoike_str = "BS Mỹ"
+        isExit: dict = donthuoctungbenhnhan.find_one({"idnumber":idnumber,"donthuocid":donthuocid})
+        if (isExit is None):
+            newRecords.append(item.__dict__)
+        else:
+            donthuoctungbenhnhan.update_one({"_id":isExit['_id']}, {"$set":item.__dict__})
+    #print(newRecords)
+    if(len(newRecords) > 0):
+        donthuoctungbenhnhan.insert_many(newRecords)
+    print(newRecords)
+    return {"message": "Success"}
+
 
     
 
-    return {"message":"don thuoc moi da duoc them vao"}
+@app.post('/donthuoctheongay/')
+async def donthuoctheongay(info: dict = Body(...)):
+# input: {
+#   "filter_type":"and",
+#   "condition": {
+#       "idnumber": {
+#           "logic": "=",
+#           "value": 882447
+#       },
+#       "ngayke": {
+#           "logic":"=",
+#           "value": "07/11/2023"
+#       }
+#   }
+# }
+    filtercondition = {}
+    if info.get("filter_type","and") == "and":
+        for col in info['condition']:
+            if (info['condition'][col]['logic'] == "="):
+                if col == "idnumber":
+                    filtercondition[col] = int(info['condition'][col]['value'])
+                else:
+                    filtercondition[col] = info['condition'][col]['value']
+    data = donthuoctungbenhnhan.find(filtercondition,{
+        "donthuocid":0,
+    })
+    data = list(data)
+    for item in data:
+        item["_id"] = str(item["_id"])
+    return {"data":data}
+    
+
+
+
+def remind(tenbenhnhan):
+    print(f"Sắp đến lịch hẹn bệnh nhân {tenbenhnhan}")
+
+
+
+@app.post("/set_lich_hen")
+async def setlichhen(item: lichhenchobenhnhan = Body(...)):
+    benhnhan = patient.find_one({"idnumber":item.idnumber})
+    if benhnhan is None:
+        return {"message": "Khong tim thay benh nhan"}
+    idbenhnhan = benhnhan['idnumber']
+    item.tenbenhnhan = benhnhan['name']
+    appointment_date = datetime.strptime(item.lich_hen, "%d/%m/%Y %H:%M")
+    if idbenhnhan:
+        formatted_date = appointment_date.strftime("%d/%m/%Y %H:%M")
+        reminder_time = appointment_date - timedelta(days=1)  # Trừ 1 ngày từ đối tượng datetime
+        formatted_reminder_time = reminder_time.strftime("%d/%m/%Y %H:%M")
+        item.reminder_time = formatted_reminder_time
+        print(formatted_date)
+        print(formatted_reminder_time)
+        lichhen.insert_one(item.__dict__)
+        # while True:
+        #     schedule.run_pending()
+        #     time.sleep(1)
+
+    return {"Benh nhan": item.tenbenhnhan, "Lich hen": item.lich_hen}
+
+    
+
+
+
+#Tạo API để tiến hành gửi thông báo và đưa vào DB
+#Các thông tin cần đưa vào db bao gồm:
+#{Thời gian gửi thông báo(mặc định là hôm nay), tên bệnh nhân và trạng thái mặc định là chưa đọc thông báo}
+#Thêm các thuộc tính : "đã đọc" và "chưa đọc" (dạng bool)
+#Khi vừa tiến hành gửi, sẽ mặc định là "chưa đọc"
+#Sau khi đọc xong, sẽ được xác định là "đã đọc"
+@app.post("/sendNotification")
+async def setNotification(item: PatientNotification = Body(...)):
+    #tìm bệnh nhân
+    benhnhan = patient.find_one({"idnumber": item.idnumber})
+    if benhnhan is None:
+        return {"message": "Khong tim thay benh nhan"}
+    
+    idbenhnhan = benhnhan['idnumber']
+    item.tenbenhnhan = benhnhan['name']
+    now = datetime.now()
+    if idbenhnhan:
+        notification_time = now.strftime("%d/%m/%Y %H:%M:%S")
+        item.sendtime = notification_time
+        item.read = False
+        notification.insert_one(item.__dict__)
+        
+    return {"Benh nhan": item.tenbenhnhan, "Thoi gian thong bao": item.sendtime}
+
+#Tạo API để tiến hành xác định các thông báo chưa đọc và đã đọc
+#Đếm số thông báo chưa đọc dựa trên id của thông báo
+#nếu bấm chuột vào thông báo đó
+@app.post("/count_unread_noti")
+async def count_unread_noti():
+    unread_count = notification.count_documents({"read": False})
+    return unread_count
+
+@app.post("/mark_noti_as_read")
+async def mark_noti_as_read(noti_id:str):
+    notiid = ObjectId(noti_id)
+    result = notification.update_one({"_id":notiid}, {"$set": {"read": True}})
+    return {"message": "success"}
+
+
+
+#Tạo API để lấy toàn bộ thông báo 
+@app.get("/getNotification")
+async def getNotification():
+    thongbao = list(notification.find({},{
+        "_id":1,
+        "sendtime":1,
+        "tenbenhnhan":1,
+        "read":1,
+        "notificationType":1
+    }))
+    for send in thongbao:
+        send['sendtime'] = datetime.strptime(send['sendtime'], '%d/%m/%Y %H:%M:%S')
+        #print(send)
+
+    thongbao.sort(key=lambda x: x['sendtime'], reverse=True)
+
+    for item in thongbao:
+        item['sendtime'] = str(item['sendtime'])
+        item['_id'] = str(item['_id'])
+
+    return thongbao
+
+
+#Phương án: tạo một basemodel chung và thêm trường notification type
+# -arrive: thông báo dạng bệnh nhân đang đến
+# -reminder: thông báo dạng lịch hẹn
+#các trường: 
+# {
+# "idnumber": 882447,
+# "tenbenhnhan": "string",
+# "notificationType":{
+#   "arrive":{
+#       "sendtime":"string"
+#   }
+# },
+# "read":"False"
+# }
+
+
+@app.post('/thongbaotheoloai')
+async def thongbaotheoloai(item: dict = Body(...)):
+    thongtinbenhnhan = patient.find_one({"idnumber": item['idnumber']})
+    if thongtinbenhnhan is None:
+        return {"message":"Khong tim thay benh nhan"}
+    now = datetime.now()
+    noticondition = {
+    'idnumber': thongtinbenhnhan['idnumber'],
+    'tenbenhnhan': thongtinbenhnhan['name'],
+    'read': False
+}
+    if item['idnumber']:
+        for col in item['notificationType']:
+            if col == 'arrive':
+                item["notificationType"][col]['sendtime'] = now.strftime("%d/%m/%Y %H:%M:%S")
+                noticondition["notificationType"] = col
+                noticondition["sendtime"] = item["notificationType"][col]['sendtime']
+                notification.insert_one(noticondition)
+    print(noticondition)
+    return {"message":"success"}
+
+# {
+# "idnumber": 882447,
+# "tenbenhnhan": "string",
+# "notificationType":{
+#   "reminder":{
+#       "sendtime":"01/01/2024 01:01:01"
+#   }
+# },
+# "read":"False"
+# }
+@app.post('/thongbaolichhen')
+async def thongbaotheoloai(item: dict = Body(...)):
+    thongtinbenhnhan = patient.find_one({"idnumber": item['idnumber']})
+    if thongtinbenhnhan is None:
+        return {"message":"Khong tim thay benh nhan"}
+    now = datetime.now()
+    noticondition = {
+    'idnumber': thongtinbenhnhan['idnumber'],
+    'tenbenhnhan': thongtinbenhnhan['name'],
+    'read': False
+}
+    if item['idnumber']:
+        for col in item['notificationType']:
+            if col == 'reminder':
+                appointment_date = datetime.strptime(item["notificationType"][col]['sendtime'],"%d/%m/%Y %H:%M:%S")
+                formatted_date = appointment_date.strftime("%d/%m/%Y %H:%M:%S")
+                #reminder_time: lời nhắc trước lịch hẹn một ngày
+                reminder_time = appointment_date - timedelta(days=1)
+                formatted_reminder_time = reminder_time.strftime("%d/%m/%Y %H:%M:%S")
+                noticondition['reminder_time'] = formatted_reminder_time
+                item['notificationType'][col]['sendtime'] = formatted_date
+                noticondition["notificationType"] = col
+                noticondition["sendtime"] = item['notificationType'][col]['sendtime']
+                lichhen.insert_one(noticondition)
+    print(noticondition)
+    return {"message":"success", "reminder_time": noticondition['reminder_time']}
+
+#Thêm chức năng xóa các thông báo không cần thiết
+@app.post('/deleteNotification')
+async def deleteNotification():
+    notification.delete_many({"read":True})
+    return {"message": "success"}
+
+@app.get('/danhsachlichhen')
+async def danhsachlichhen():
+    items = list(lichhen.find({},{
+        "_id":1,
+        "tenbenhnhan":1,
+        "read":1,
+        "reminder_time":1,
+        "notificationType":1,
+        "sendtime":1
+    }))
+    for item in items:
+        item['_id'] = str(item['_id'])
+
+    return items
+
+@app.post("/count_unread_reminder")
+async def count_unread_reminder():
+    unread_count = lichhen.count_documents({"read": False})
+    return unread_count
+
+@app.post("/mark_reminder_as_read")
+async def mark_reminder_as_read(noti_id:str):
+    notiid = ObjectId(noti_id)
+    result = lichhen.update_one({"_id":notiid}, {"$set": {"read": True}})
+    return {"message": "success"}
+
+@app.post('/delete_reminder')
+async def delete_reminder():
+    lichhen.delete_many({"read":True})
+    return {"message": "success"}
+
+@app.post('/lichhentheongay')
+async def lichhentheongay(item: dict = Body(...)):
+#Lấy lịch hẹn theo ngày
+# JSON:
+# {
+# "condition":{
+#   "sendtime":{
+#       "logic": "=",
+#       "value": "01/01/2024"
+# }
+# }
+#Logic:
+# collection bao gồm tập hợp các dữ liệu có định dạng %d/%m/%Y %H:%M:%S
+# input: dữ liệu có dạng %d/%m/%Y, lấy từ file JSON ở trên
+# output: tập hợp các dữ liệu có ngày tháng năm trong collection trùng với input
+
+    filtercondition = {}
+    for col in item['condition']:
+        if (item['condition'][col]['logic'] == '='):
+            dt = datetime.strptime(item["condition"][col]['value'],"%d/%m/%Y").date()
+            print(dt)
+            data = list(lichhen.find({
+                "sendtime": {
+                    "$gte": dt.strftime("%d/%m/%Y 00:00:00"),
+                    "$lte": dt.strftime("%d/%m/%Y 23:59:59")
+                },
+                
+            }))
+            for i in data:
+                i['_id'] = str(i['_id'] )
+            print(data)
+    return data
+
+    
+
+    
+    
+    

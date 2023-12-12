@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-//import { useP } from "react";
-//import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from "react-bootstrap/esm/Button";
@@ -9,26 +7,32 @@ import axios from "axios";
 import Payment from "./TreatmentFunction/Payment";
 import Thuthuat from "./TreatmentFunction/Thuthuat";
 import Sidebar from "./Sidebar";
-import Offcanvas from 'react-bootstrap/Offcanvas';
-//import './Sidebar.css;'
+import Donthuoc from "./TreatmentFunction/Donthuoc";
+import Lichhen from "./TreatmentFunction/Lichhen";
+import Notification from "./Function/Notification";
+import AppointmentNoti from "./Function/AppointmentNoti";
 
 function Treatment() {
     const {idnumber} = useParams();
     const [detailData, setDetailData] =useState({});
     const [payment, setPayment] = useState(false);
     const [thuthuat, setThuthuat] = useState(false);
-
+    //const [dropdown, setDropdown] = useState(false);
     //const [chitiet, setChitiet] = useState([]);
 
     const [ngaykham, setNgaykham] = useState([]);
     const [filterType, setFilterType] = useState('and');
     const [filter, setFilter] = useState([]);
-    //const [data,setData] = useState([]);
-    //const [ngay, setNgay] = useState("");
     const [nhomthuthuat, setNhomthuthuat] = useState([]);
     const [sidebar, setSidebar] = useState(false);
-    const handleShowSidebar = ()  => {
-        setSidebar(true);
+    
+    const [opendonthuoc, setOpendonthuoc] = useState(false);
+    const [lichhen, setLichhen] = useState(false);
+    const [lichhenData, setLichhenData] = useState(null);
+
+    const handleLichhenData = (reminder) => {
+        setLichhenData(reminder);
+        console.log(reminder);
     }
 
     
@@ -86,7 +90,7 @@ function Treatment() {
     useEffect(()=>{
         axios.get(`http://127.0.0.1:8000/ngaykham/${idnumber}`)
         .then((response)=>{
-            console.log(response.data);
+            //console.log(response.data);
             setNgaykham(response.data);
             //setFilter(ngaykham);
         })
@@ -115,23 +119,32 @@ function Treatment() {
     <div className='Treatment'>
         <nav className='navfunction'>
             <div className="container-fluid">
-                <ul className="nav navbar-nav">
-                    <li className="nav-items">
-                        <Button className="btnmenu btn-primary"
-                        onClick={()=> {setSidebar(true)}}
-                        >
-                            <i class='bx bx-menu'></i>
-                        </Button>
-                        {sidebar && <Sidebar show={sidebar} onHide={()=> setSidebar(false)}/>}
+                <div className="nav navbar-nav">
+                    <div className="d-flex">
+                        <div className="SidebarBtn">
+                            <button className="btn btnmenu-1"
+                            onClick={()=> {setSidebar(true)}}
+                            >
+                                <i class='bx bx-menu' style={{fontSize:"25px"}}></i>
+                            </button>
+                            {sidebar && <Sidebar show={sidebar} onHide={()=> setSidebar(false)}/>}
+                        </div>
                         
-                    </li>
-                    <li className="nav-items text-center">
-                        <h3>KHÁM BỆNH - ĐIỀU TRỊ</h3> 
-                    </li>
-                </ul>
+                        
+                        <div className="title">
+                            <h3>KHÁM BỆNH - ĐIỀU TRỊ</h3> 
+                        </div>
+
+                        <div className="NotiList">
+                            <AppointmentNoti reminder = {lichhenData}/>
+                        
+                            <Notification/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </nav>
-        <hr/>
+        {/* <hr/> */}
         <div id = "hoso" className='container-fluid tab-pane active'>
             <div className="row">
                 <div className="col-sm-7 thong-tin-benh-nhan">
@@ -413,18 +426,21 @@ function Treatment() {
                     <Row>
                         <Col >
                             <Button className="button" onClick={()=>setThuthuat(true)}>Khám bệnh</Button>
-                            {/* <Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)}/> */}
-                            {thuthuat && <Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)} nhomthuthuat={nhomthuthuat} />}
+                            {<Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)} nhomthuthuat={nhomthuthuat} />}
 
                             <Button className="button" onClick={()=> setPayment(true)}>Thanh toán</Button>
                             <Payment show={payment} onHide={()=>setPayment(false)}/>
                             
-                            <Button className="button">Đơn thuốc</Button>
+                            <Button className="button" onClick={()=>setOpendonthuoc(true)}>Đơn thuốc</Button>
+                            <Donthuoc show={opendonthuoc} onHide={()=>setOpendonthuoc(false)}/>
+
                         </Col>
                     </Row>
                     <Row>
                         <Col >
-                            <Button className="button">Lịch hẹn</Button>
+                            <Button className="button" onClick={()=>setLichhen(true)}>Lịch hẹn</Button>
+                            <Lichhen show={lichhen} onHide={()=>setLichhen(false)} onLichhenData = {(reminder) => handleLichhenData(reminder)}/>
+
                             <Button className="button">In bệnh án</Button>
                             <Button className="button">Lưu</Button>
                         </Col>
@@ -433,92 +449,120 @@ function Treatment() {
             </Row>
             <hr/>
             <div className="chi-tiet-kham-benh">
-                <h5>Chi tiết khám bệnh</h5>
-                <Button className="button" onClick={refreshData}>REFRESH</Button>
-                <div className="tablengaykham table-bordered"  >
-                <table className="ngaykham">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Ngày khám</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {ngaykham ? (
-                            ngaykham.map((item, index) => {
-                                console.log(item)
-                                return (
-                                    <tr key={index} onDoubleClick={()=> handleDoubleClick(item.ngaykham)}>
-                                        <td></td>
-                                        <td>{item.ngaykham}</td>
-                                    </tr>
-                                );
-                            })
-                        ): null}
-                    </tbody>
-                </table>
-
-
-                <table className="thongtinkhac">
-                    <thead>
-                        <tr>
-                            <th>Răng</th>
-                            <th style={{minWidth:"200px"}}>Tên thủ thuật</th>
-                            <th>Nội dung thủ thuật</th>
-                            <th style={{minWidth:"50px", width:"80px"}}>Số lượng</th>
-                            <th>Đơn giá</th>
-                            <th>Thành tiền</th>
-                            <th style={{minWidth:"50px", width:"30px"}}>%</th>
-                            <th style={{minWidth:"85px", width:"30px"}}>Giảm giá</th>
-                            <th>Lý do giảm</th>
-                        </tr>
-                        
-                    </thead>
-                    <tbody>
-                        {filter ? (
-                            filter.map((item)=> {
-                                let percent = item.thanh_tien * item.percent / 100;
-                                console.log(item)
-                                return (
-                                    <tr key={item._id}>
-                                        <td></td>
-                                        <td>{item.ten_thu_thuat}</td>
-                                        <td></td>
-                                        <td>{item.so_luong}</td>
-                                        <td>{item.don_gia}</td>
-                                        <td>{item.thanh_tien}</td>
-                                        <td style={{width:"20px"}}>
-                                            <input
-                                            type="number"
-                                            name="percent"
-                                            value={item.percent}
-                                            onChange={(e)=>{
-                                                let val = e.target.value
-                                                item.percent = val
-                                                setFilter([...filter])
-                                                
-                                            }}
-                                            />
-                                        </td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                );
-                            })
-                        ): null}
-                    </tbody>
-                </table>
-
-
-                
-
+                <div className="header">
+                    <h5>Chi tiết khám bệnh</h5>
+                    <Button className="button" onClick={refreshData}>REFRESH</Button>
+                </div>
+                <div className="tablengaykham ">
+                    <div className="table-wrapper">
+                        <table className="ngaykham table-bordered">
+                            <thead>
+                                <tr>
+                                    {/* <th>STT</th> */}
+                                    <th>Ngày khám</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div className="tbody-wrapper">
+                        <table className="ngaykham table-bordered">
+                            <tbody>
+                                {ngaykham ? (
+                                    ngaykham.map((item, index) => {
+                                        return (
+                                            <tr key={index} onClick={()=> handleDoubleClick(item.ngaykham)} style={{cursor:"pointer"}}>
+                                                {/* <td></td> */}
+                                                <td>{item.ngaykham}</td>
+                                            </tr>
+                                        );
+                                    })
+                                ): null}
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div className="table-wrapper-2">
+                        <table className="thongtinkhac table-bordered">
+                            <thead>
+                                <tr>
+                                    <th className="rang">Răng</th>
+                                    <th className="tenthuthuat">Tên thủ thuật</th>
+                                    <th className="noidungthuthuat">Nội dung thủ thuật</th>
+                                    <th className="soluong">Số lượng</th>
+                                    <th className="dongia">Đơn giá</th>
+                                    <th className="thanhtien">Thành tiền</th>
+                                    <th className="percent">%</th>
+                                    <th className="giamgia">Giảm giá</th>
+                                    <th className="lydogiam">Lý do giảm</th>
+                                </tr> 
+                            </thead>
+                        </table>
+                        <div className="tbody-wrapper">
+                        <table className="thongtinkhac table-bordered">
+                            <tbody>
+                                {filter ? (
+                                    filter.map((item)=> {
+                                        let percent = item.thanh_tien * item.percent / 100;
+                                        //console.log(item)
+                                        return (
+                                            <tr key={item._id}>
+                                                <td className="rang"></td>
+                                                <td className="tenthuthuat">{item.ten_thu_thuat}</td>
+                                                <td className="noidungthuthuat"></td>
+                                                <td className="soluong">{item.so_luong}</td>
+                                                <td className="dongia">{item.don_gia}</td>
+                                                <td className="thanhtien">{item.thanh_tien}</td>
+                                                <td className="percent">
+                                                    {/* <input
+                                                    type="number"
+                                                    name="percent"
+                                                    value={item.percent}
+                                                    onChange={(e)=>{
+                                                        let val = e.target.value
+                                                        item.percent = val
+                                                        setFilter([...filter])
+                                                        
+                                                    }}
+                                                    /> */}
+                                                </td>
+                                                <td className="giamgia"></td>
+                                                <td className="lydogiam"></td>
+                                            </tr>
+                                        );
+                                    })
+                                ): null}
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    <div className="footertest">
+        <ul className="nav">
+            <div className='totalprice' style={{paddingLeft:"20px"}}>
+                <label htmlFor='totalprice' className='form-label'>TỔNG THANH TOÁN</label>
+                <input type='text' 
+                className='form-control' 
+                > 
+                </input>
+            </div>
+            <div className='totalsell' style={{paddingLeft:"20px"}}>
+                <label htmlFor='totalprice' className='form-label'>TỔNG KHUYẾN MÃI</label>
+                <input type='text' 
+                className='form-control' 
+                > 
+                </input>
+            </div>
+            <div className='totalpay' style={{paddingLeft:"20px"}}>
+                <label htmlFor='totalprice' className='form-label'>TỔNG SỐ TIỀN ĐÃ THANH TOÁN</label>
+                <input type='text' 
+                className='form-control' 
+                > 
+                </input>
+            </div>
+        </ul>
         
-
-
-
+    </div>
     </div>)
 }
 

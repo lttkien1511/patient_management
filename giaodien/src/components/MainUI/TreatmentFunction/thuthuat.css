@@ -38,6 +38,17 @@
     /* display: inline-block; */
 }
 
+.donthuoc .table-wrapper {
+    height: 600px;
+    overflow: auto;
+}
+.donthuoc .refreshbutton {
+    float: right;
+}
+.donthuoc .thuthuatbutton {
+    margin-right: 5px;
+}
+
 .thuthuatdieutri .card {
     position: absolute;
     background-color: #383838;
@@ -47,7 +58,59 @@
     box-sizing: border-box;
 }
 
-/* .thuthuatdieutri .card ul li:hover  {
-    cursor: pointer;
-    background-color: aqua;
-} */
+
+.donthuocchobenhnhan .modal-content {
+    width: 1500px;
+    margin-left: -500px;
+}
+
+.donthuocchobenhnhan .donthuocduocchon {
+    width: 70%;
+    float: right;
+    padding: 5px;
+}
+.donthuocchobenhnhan .danhmucthuoc {
+    width: 28%;
+    float: left;
+    padding: 5px;
+}
+
+.donthuocchobenhnhan .ngaykevanguoike {
+    display: flex;
+    align-items: center;
+    gap: 305px;
+}
+
+.Notification .content {
+    height: 200px;
+    overflow-y: scroll;
+}
+
+.Notification .dropdown-header .h4{
+    z-index: 1;
+    position: fixed;
+    padding-bottom: 10px;
+}
+
+.Notification .dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 110px;
+}
+
+.AppointmentNoti .dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 280px;
+}
+
+.AppointmentNoti .content {
+    height: 200px;
+    overflow-y: scroll;
+}
+
+.appointmentlist .lich {
+    width: 50%;
+    float: left;
+    padding: 5px;
+}

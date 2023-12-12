@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 
 
-function Addthuthuat(props, item) {
+function Addthuthuat(props) {
 
     
 
@@ -40,12 +40,13 @@ function Addthuthuat(props, item) {
         axios.request(config)
         .then((response) => {
         console.log(JSON.stringify(response.data));
-        Swal.fire({
-            icon: 'success',
-            title: 'Thủ thuật mới đã được thêm vào',
-            showConfirmButton:false,
-            timer:2000
-        })
+            Swal.fire({
+                icon: 'success',
+                title: 'Thủ thuật mới đã được thêm vào',
+                showConfirmButton:false,
+                timer:2000
+            });
+            //props.refreshTT();
         })
         .catch((error) => {
         console.log(error);

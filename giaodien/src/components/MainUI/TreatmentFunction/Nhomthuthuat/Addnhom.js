@@ -18,6 +18,8 @@ function Addnhom(props) {
         
     };
 
+    
+
     const handleSubmit = (e) => {
         e.preventDefault();
         let data = JSON.stringify(
@@ -36,13 +38,14 @@ function Addnhom(props) {
 
         axios.request(config)
         .then((response) => {
-        console.log(JSON.stringify(response.data));
-        Swal.fire({
-            icon: 'success',
-            title: 'Nhóm thủ thuật mới đã được thêm vào',
-            showConfirmButton:false,
-            timer:2000
-        })
+            console.log(JSON.stringify(response.data));
+            Swal.fire({
+                icon: 'success',
+                title: 'Nhóm thủ thuật mới đã được thêm vào',
+                showConfirmButton:false,
+                timer:2000
+            });
+            props.refreshNhom();
         })
         .catch((error) => {
         console.log(error);
