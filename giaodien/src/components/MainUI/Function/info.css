@@ -14,27 +14,6 @@
   margin-left:200px;
 }
 
-
-
-.form-group-1  {
-    margin-left: 20px;
-    width: 208px;
-} 
-.form-group-3 {
-    width: 260px;
-}
-.form-group-3 .form-control {
-    width: 230px
-}
-.form-group-4 {
-    width: 100px;
-}
-.form-group-4 .form-control {
-    width: 80px;
-}
-.form-group-5 .form-control {
-  width: 790px;
-}
 .form-check {
     display: inline-block;
     margin: 0 10px 0 10px;
@@ -83,4 +62,18 @@
 
   .AppointmentNoti .dropdown-toggle::after {
     display: none;
+  }
+
+  .MedicineInfo .dropdown-toggle::after {
+    display: none;
+  }
+
+  .MedicineInfo .dropdown-menu {
+    width: 500px;
+    
+  }
+
+  .MedicineInfo table td {
+    /* display: flex; */
+    width: 500px;
   }

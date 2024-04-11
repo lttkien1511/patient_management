@@ -1,71 +1,30 @@
 import React, { useState } from "react";
 import  Modal  from 'react-bootstrap/Modal';
-import Swal from 'sweetalert2';
-import axios from 'axios';
+import { Procedure, addProcedureGroup } from "../../../../model/thuthuat";
+import GenericForm from "../../../../helper/form";
 
 function Addnhom(props) {
     
+    const [formData, setFormData] = useState({
+        procedureGroup: ""
+    });
 
-    const nhomthuthuat = {
-        ten_nhom_thu_thuat: "",
-    };
-
-    const [add, setAdd] = useState(nhomthuthuat);
-
-    const handleAdd = (e) => {
-        // console.log(e.target.value);
-        setAdd({...add, [e.target.name]: e.target.value});
-        
-    };
-
-    
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        let data = JSON.stringify(
-            add
-        );
-
-        let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: 'http://127.0.0.1:8000/addnhomthuthuat',
-        headers: { 
-            'Content-Type': 'application/json'
-        },
-        data : data
-        };
-
-        axios.request(config)
-        .then((response) => {
-            console.log(JSON.stringify(response.data));
-            Swal.fire({
-                icon: 'success',
-                title: 'Nhóm thủ thuật mới đã được thêm vào',
-                showConfirmButton:false,
-                timer:2000
-            });
-            props.refreshNhom();
+    const handleSubmit = () => {
+        const data = new Procedure();
+        data.procedureGroup = formData.procedureGroup;
+        addProcedureGroup(data.toObject()).then((response) => {
+            if(response){
+                console.log(JSON.stringify(response.data));
+                window.makeAlert('success', 'Thêm nhóm thủ thuật thành công');
+                props.refreshNhom();
+            }
         })
-        .catch((error) => {
-        console.log(error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Thất bại',
-            //text: 'Something went wrong!',
-            //footer: '<a href="">Why do I have this issue?</a>'
-          })
-        });
+    };
 
-    }
-
-
-
-
-
-
-
-
+    const fields = [
+        {id:'procedureGroup', label:'Nhập nhóm thủ thuật mới', type:'text', name:'procedureGroup', placeholder:'', className:"custom-input name-input"},
+    ]
+    
     return (
         <Modal {...props} className="addnhomthuthuat">
             <Modal.Header closeButton>
@@ -75,17 +34,11 @@ function Addnhom(props) {
             </Modal.Header>
 
             <Modal.Body>
-                <label htmlFor='nhomthuthuat' className='form-label'>Nhập nhóm thủ thuật mới</label>
-                <input type='text'
-                className="form-control"
-                // id='ten_nhom_thu_thuat'
-                name='ten_nhom_thu_thuat'
-                value={add.ten_nhom_thu_thuat}
-                onChange={handleAdd}
-                //autoFocus
+                <GenericForm
+                fields={fields}
+                formData={formData}
+                setFormData={setFormData}
                 />
-
-                {/* <input></input> */}
             </Modal.Body>
 
             <Modal.Footer>

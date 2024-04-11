@@ -1,64 +1,33 @@
 import React, { useState } from "react";
 import  Modal  from 'react-bootstrap/Modal';
-import Swal from 'sweetalert2';
-import axios from 'axios';
-
+import { Procedure, addProcedure } from "../../../../model/thuthuat";
+import GenericForm from "../../../../helper/form";
 
 function Addthuthuat(props) {
 
-    
-
-    const thuthuat = {
-        ten_thu_thuat:"",
+    const [formData, setFormData] = useState({
+        procedure: "",
         don_gia: 0
-    }
-
-    const [add, setAdd] = useState(thuthuat);
-    
-    const handleAdd = (e) => {
-        setAdd({...add, [e.target.name]: e.target.value})
-    }
+    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const item = props.item;
-        console.log(item);
-        let data = JSON.stringify(
-            add
-        );
-        
-        let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: `http://127.0.0.1:8000/addthuthuat?id=${item}`,
-        headers: { 
-            'Content-Type': 'application/json'
-        },
-        data : data
-        };
-        
-        axios.request(config)
-        .then((response) => {
-        console.log(JSON.stringify(response.data));
-            Swal.fire({
-                icon: 'success',
-                title: 'Thủ thuật mới đã được thêm vào',
-                showConfirmButton:false,
-                timer:2000
-            });
-            //props.refreshTT();
+        const data = new Procedure();
+        data.procedure = formData.procedure;
+        data.don_gia = formData.don_gia;
+        addProcedure(data.toObject(), item).then((response) => {
+            if(response){
+                console.log(JSON.stringify(response.data));
+                window.makeAlert('success', 'Thêm thủ thuật mới thành công');
+            }
         })
-        .catch((error) => {
-        console.log(error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Thất bại',
-            //text: 'Something went wrong!',
-            //footer: '<a href="">Why do I have this issue?</a>'
-          })
-        });
-    }
+    };
 
+    const fields = [
+        {id:'procedure', label:'Nhập thủ thuật mới', type:'text', name:'procedure', placeholder:'', className:"custom-input name-input"},
+        {id:'don_gia', label:'Nhập đơn giá', type:'text', name:'don_gia', placeholder:'', className:"custom-input name-input"},
+    ]
 
     return (
         <Modal {...props} className="addthuthuat">
@@ -69,23 +38,11 @@ function Addthuthuat(props) {
             </Modal.Header>
 
             <Modal.Body>
-                <label htmlFor='thuthuat' className='form-label'>Nhập thủ thuật mới</label>
-                <input type='text'
-                className="form-control"
-                id='ten_thu_thuat'
-                name='ten_thu_thuat'
-                value={add.ten_thu_thuat}
-                onChange={handleAdd}
+                <GenericForm
+                    fields={fields}
+                    formData={formData}
+                    setFormData={setFormData}
                 />
-                <label htmlFor='dongia' className='form-label'>Nhập đơn giá</label>
-                <input type='number'
-                className="form-control"
-                id='don_gia'
-                name='don_gia'
-                value={add.don_gia}
-                onChange={handleAdd}
-                />
-                
             </Modal.Body>
 
             <Modal.Footer>

@@ -1,14 +1,12 @@
 import Button from "react-bootstrap/esm/Button";
 import React, { useEffect, useState } from "react";
 import Modal from 'react-bootstrap/Modal';
-import axios from "axios";
-import Swal from "sweetalert2";
 import Adddonthuoc from "../TreatmentFunction/Nhomthuthuat/Adddonthuoc";
+import { getMedicineData, dropMedicineData } from "../../../model/list_medicine";
 
 function Medicine (props) {
     const [adddonthuoc, setAdddonthuoc] = useState(false);
     const [data, setData] = useState([]);
-
 
     const [clickeddonthuoc, setClickeddonthuoc] = useState(false);
     const [selecteditem, setSelecteditem] = useState(null);
@@ -17,11 +15,14 @@ function Medicine (props) {
         y:0,
     })
 
+    const onShow = () => {
+        refresh();
+    }
+
     const handleContextMenuDonthuoc = (e, item) => {
         e.preventDefault();
         setClickeddonthuoc(true);
         setSelecteditem(item);
-        //console.log(selecteditem);
         setPoints({x:e.pageX, y:e.pageY});
         console.log('Right click', e.pageX, e.pageY);
         console.log('Item info:', item);
@@ -35,54 +36,35 @@ function Medicine (props) {
         };
     }, []);
 
-
-    useEffect(() => {
-        axios.get(`http://127.0.0.1:8000/danhsachtoanbodonthuoc`)
-        .then((response) => {
-            setData(response.data);
-        })
-        .catch((error) => {
-            console.error('Lỗi khi tải dữ liệu chi tiết: ',error);
-        })
-    },[]);
-
-    const refreshdonthuoc = () => {
-        axios
-        .get(`http://127.0.0.1:8000/danhsachtoanbodonthuoc`)
-        .then((response) => {
-            setData(response.data);
+    const refresh = () => {
+        getMedicineData().then((response) => {
+            if (response) {
+                setData(response.data);
+            }
         })
         .catch((error) => {
             console.error('Refresh error', error);
         })
     }
 
-
     const deleteDonthuoc = () => {
-        if (selecteditem) {
-            const donthuocId = selecteditem._id;
-            console.log(donthuocId);
-            axios
-            .delete(`http://127.0.0.1:8000/xoadonthuoc?id=${donthuocId}`)
-            .then((response)=> {
-                console.log(response.data);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Đơn thuốc đã được xóa',
-                    showConfirmButton:false,
-                    timer:2000
-                });
-                refreshdonthuoc();
-            })
-            .catch((error) => {
-                console.log(error);
-            })
-        }
+        const donthuocId = selecteditem._id;
+        dropMedicineData(donthuocId).then((response) => {
+            if (response) {
+                console.log(JSON.stringify(response.data));
+                window.makeAlert('success', 'Xóa thuốc thành công');
+                refresh();
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+        })
     }
 
     return (
-    
-    <Modal {...props}>
+    <Modal {...props} onShow={() => {
+        onShow()
+    }}>
         <Modal.Header closeButton>
             <Modal.Title>
                 Danh mục đơn thuốc
@@ -94,18 +76,15 @@ function Medicine (props) {
                 <Button className="thuthuatbutton" variant="primary" onClick={()=>setAdddonthuoc(true)}>
                     <i className='bx bx-plus'>THÊM</i>
                 </Button>
-                <Adddonthuoc show={adddonthuoc} onHide={()=>setAdddonthuoc(false)} refreshDT={refreshdonthuoc}/>
-
+                <Adddonthuoc show={adddonthuoc} onHide={()=>setAdddonthuoc(false)} refreshDT={refresh}/>
 
                 <Button className="thuthuatbutton" variant="primary">
                     SỬA
                 </Button>
-                <Button className="refreshbutton" variant="primary" onClick={refreshdonthuoc}>
+                <Button className="refreshbutton" variant="primary" onClick={refresh}>
                     REFRESH
                 </Button>
-            
-
-
+ 
                 <div className="table-wrapper">
                     <table className="table table-bordered table-responsive-lg"
                     style={{ overflowY: "auto", maxHeight: "300px"}}
@@ -139,18 +118,16 @@ function Medicine (props) {
                                                 </Button>
                                             </ul>
                                         </div>
-                        )}
+                                    )}
                                     </tr>
                                 )
                             })}
                         </tbody>
-                        
                     </table>
                 </div>
             </div>
         </Modal.Body>
     </Modal>
-
     )
 }
 

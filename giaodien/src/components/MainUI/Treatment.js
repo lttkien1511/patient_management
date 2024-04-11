@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
 import Button from "react-bootstrap/esm/Button";
-import { useParams } from "react-router-dom";
+import { useParams , useNavigate} from "react-router-dom";
 import axios from "axios";
 import Payment from "./TreatmentFunction/Payment";
 import Thuthuat from "./TreatmentFunction/Thuthuat";
@@ -11,18 +12,21 @@ import Donthuoc from "./TreatmentFunction/Donthuoc";
 import Lichhen from "./TreatmentFunction/Lichhen";
 import Notification from "./Function/Notification";
 import AppointmentNoti from "./Function/AppointmentNoti";
+import MedicineInfo from "./Function/MedicineInfo";
+import moment from "moment";
 
-function Treatment() {
+
+function Treatment(props) {
     const {idnumber} = useParams();
-    const [detailData, setDetailData] =useState({});
+    const [detailData, setDetailData] =useState([]);
     const [payment, setPayment] = useState(false);
     const [thuthuat, setThuthuat] = useState(false);
-    //const [dropdown, setDropdown] = useState(false);
-    //const [chitiet, setChitiet] = useState([]);
+    const navigate = useNavigate();
 
     const [ngaykham, setNgaykham] = useState([]);
     const [filterType, setFilterType] = useState('and');
-    const [filter, setFilter] = useState([]);
+    const [filterthuthuat, setFilterthuthuat] = useState([]);
+    const [filterdonthuoc, setFilterdonthuoc] = useState([]);
     const [nhomthuthuat, setNhomthuthuat] = useState([]);
     const [sidebar, setSidebar] = useState(false);
     
@@ -30,12 +34,16 @@ function Treatment() {
     const [lichhen, setLichhen] = useState(false);
     const [lichhenData, setLichhenData] = useState(null);
 
+    const handleBacktoMainpage = () => {
+        const mainpage = `/ho-so-benh-nhan`;
+        navigate(mainpage);
+    }
+
     const handleLichhenData = (reminder) => {
         setLichhenData(reminder);
         console.log(reminder);
     }
 
-    
     const handleDoubleClick = (ngaykham) => {
         //e.preventDefault();
         let data = JSON.stringify({
@@ -46,6 +54,10 @@ function Treatment() {
                     "value": idnumber
                 },
                 "ngaykham": {
+                    "logic": "=",
+                    "value": ngaykham
+                },
+                "ngayke": {
                     "logic": "=",
                     "value": ngaykham
                 }
@@ -65,9 +77,8 @@ function Treatment() {
           axios.request(config)
           .then((response) => {
             const result = response.data;
-            console.log(JSON.stringify(result));
-            setFilter(result.data);
-            
+            setFilterthuthuat(result.datathuthuat);
+            setFilterdonthuoc(result.datadonthuoc);            
           })
           .catch((error) => {
             console.log(error);
@@ -79,20 +90,20 @@ function Treatment() {
         axios
         .get(`http://127.0.0.1:8000/ngaykham/${idnumber}`)
         .then((response)=>{
-            console.log(response.data);
-            setNgaykham(response.data);
+            const formattedNgaykham = response.data.thuthuatcanhan_unique.map((ngay) => moment(ngay).format('DD/MM/YYYY'))
+            setNgaykham(formattedNgaykham);
         })
         .catch((error) => {
             console.error('Refresh error', error);
         });
     };
 
+    
+
     useEffect(()=>{
         axios.get(`http://127.0.0.1:8000/ngaykham/${idnumber}`)
         .then((response)=>{
-            //console.log(response.data);
             setNgaykham(response.data);
-            //setFilter(ngaykham);
         })
         .catch((error) => {
             console.error('Refresh error', error);
@@ -103,17 +114,31 @@ function Treatment() {
 
 
     useEffect(()=> {
-        axios.get(`http://127.0.0.1:8000/getAllData/${idnumber}`)
+        axios.get(`http://127.0.0.1:8000/patient/getDetailData?idnumber=${idnumber}`)
         .then((response) => {
-            setDetailData(response.data);
-            //setNgaykham(response.data.ngaykham);
+            setDetailData(response.data.data);
           })
           .catch((error) => {
             console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
           });
     }, [idnumber]);
 
+    const calcucateTotalPrice = () => {
+        let totalPrice = 0;
+        filterthuthuat.forEach((item) => {
+            let sotiengiamgia = item.percent > 0 ? (item.thanh_tien * item.percent / 100) : 0;
+            totalPrice += (item.thanh_tien - sotiengiamgia);
+        });
+        return totalPrice;
+    };
 
+    const calculateSale = () => {
+        let Sale = 0;
+        filterthuthuat.forEach((item) => {
+            Sale += item.giam_gia;
+        });
+        return Sale;
+    }
 
     return (
     <div className='Treatment'>
@@ -121,23 +146,33 @@ function Treatment() {
             <div className="container-fluid">
                 <div className="nav navbar-nav">
                     <div className="d-flex">
-                        <div className="SidebarBtn">
-                            <button className="btn btnmenu-1"
-                            onClick={()=> {setSidebar(true)}}
-                            >
-                                <i class='bx bx-menu' style={{fontSize:"25px"}}></i>
-                            </button>
-                            {sidebar && <Sidebar show={sidebar} onHide={()=> setSidebar(false)}/>}
+                        <div className="congcu">
+                            <div className="backtomainpage">
+                                <Button 
+                                className="btn backtomainpage rounded-pill" 
+                                variant="outline-success"
+                                onClick={handleBacktoMainpage}
+                                >
+                                        <i class='bx bx-chevron-left' style={{fontSize:"25px"}} ></i>
+                                        Về trang chủ
+                                </Button>
+                            </div>
+                            <div className="SidebarBtn">
+                                <button className="btn btnmenu-1"
+                                onClick={()=> {setSidebar(true)}}
+                                >
+                                    <i class='bx bx-menu' style={{fontSize:"25px"}}></i>
+                                </button>
+                                {sidebar && <Sidebar show={sidebar} onHide={()=> setSidebar(false)}/>}
+                            </div>
                         </div>
                         
-                        
                         <div className="title">
-                            <h3>KHÁM BỆNH - ĐIỀU TRỊ</h3> 
+                            <h4>KHÁM BỆNH - ĐIỀU TRỊ</h4> 
                         </div>
 
                         <div className="NotiList">
                             <AppointmentNoti reminder = {lichhenData}/>
-                        
                             <Notification/>
                         </div>
                     </div>
@@ -147,331 +182,100 @@ function Treatment() {
         {/* <hr/> */}
         <div id = "hoso" className='container-fluid tab-pane active'>
             <div className="row">
-                <div className="col-sm-7 thong-tin-benh-nhan">
+                <div className="container-fluid thong-tin-benh-nhan">
                     <h5>Thông tin bệnh nhân</h5>
-                    {/* <br/> */}
-                    <ul className='nav'>
-                    <li>
-                        <div className='sohoso'>
-                            <label htmlFor='idnumber' className='form-label'>SỐ HỒ SƠ</label>
-                            <input type='text' 
-                            className='form-control' 
-                            id='idnumber' 
-                            name='idnumber'
-                            value={detailData.idnumber}
-                            disabled
-                            //onChange={handleAdd}
-                            > 
-                            </input>
-                        </div>
-                    </li>
-                    <li>
-                        <div className='form-group-3'>
-                            <label htmlFor='name' className='form-label'>HỌ VÀ TÊN</label>
-                            <input type='text' 
-                            className='form-control' 
-                            id='name' 
-                            name='name'
-                            value={detailData.name}
-                            disabled
-                            //onChange={handleAdd}
-                            > 
-                            </input>
-                        </div>
-                    </li>
-                    <li>
-                        <div className='form-group-4'>
-                            <label htmlFor='age' className='form-label'>TUỔI</label>
-                            <input type='number' 
-                            className='form-control' 
-                            id='age'
-                            name='age'
-                            value={detailData.age}
-                            //onChange={handleAdd} 
-                            disabled
-                            >
-                            </input>
-                        </div>
-                    </li>
-                    <li>
-                        <div className='form-group-1'>
-                            <label htmlFor='birthday' className='form-label'>NGÀY SINH</label>
-                            <input type='text' 
-                            className='form-control' 
-                            id='birthday' 
-                            name='birthday'
-                            value={detailData.birthday}
-                            //onChange={handleAdd}
-                            disabled
-                            >
-                            </input>
-                        </div>
-                    </li>
-                    <li>
-                        <div className='gioitinh'>
-                            <label htmlFor='gender' className='form-label'>GIỚI TÍNH</label>
-                            <input type="text"
-                            className='form-control'
-                            id="gender"
-                            name='gender'
-                            value={detailData.gender}
-                            disabled
-                            //onChange={handleAdd}
-                            >
-                                {/* <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option> */}
-                            </input>
-                        </div>
-                    </li>
-                    
-                    <li>
-                        <div className='diachi'>
-                            <label htmlFor='address' className='form-label'>ĐỊA CHỈ</label>
-                            <input type='text' 
-                            className='form-control' 
-                            id='address' 
-                            name='address'
-                            value={detailData.address}
-                            disabled
-                            //onChange={handleAdd}
-                            >                                    
-                            </input>
-                        </div>
-                    </li>
-                    
-                    <li>
-                        <div className='lydokham'>
-                            <label htmlFor='reason' className='form-label'>LÝ DO KHÁM</label>
-                            <input type='text' 
-                            className='form-control' 
-                            id='reason'
-                            name='reason'
-                            value={detailData.reason}
-                            disabled
-                            //onChange={handleAdd} 
-                            >                                    
-                            </input>
-                        </div>
-                    </li>
-                </ul>
-                    
-                </div>
-
-                <div className="col-sm-5 tien-su-benh">
-                <h5>Tiền sử bệnh</h5>
-                <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Chảy máu lâu"
-                            //checked={add.medical_history.includes("Chảy máu lâu")}
-                            //onChange={() => handleCheckboxChange("Chảy máu lâu")}
-                            />
-                            Chảy máu lâu
-                        </label>
-                    </div>
-                    
-
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Dị ứng thuốc"
-                            //checked={add.medical_history.includes("Dị ứng thuốc")}
-                            //onChange={() => handleCheckboxChange("Dị ứng thuốc")}
-                            />
-                            Dị ứng thuốc
-                        </label>
-                    </div>
-
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Thấp khớp"
-                            //checked={add.medical_history.includes("Thấp khớp")}
-                            //onChange={() => handleCheckboxChange("Thấp khớp")}
-                            />
-                            Thấp khớp
-                        </label>
-                    </div>
-
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Huyết áp"
-                            //checked={add.medical_history.includes("Huyết áp")}
-                            //onChange={() => handleCheckboxChange("Huyết áp")}
-                            />
-                            Huyết áp
-                        </label>
-                    </div>
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Tim mạch"
-                            //checked={add.medical_history.includes("Tim mạch")}
-                            //onChange={() => handleCheckboxChange("Tim mạch")}
-                            />
-                            Tim mạch
-                        </label>
-                    </div>
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Tiểu đường"
-                            //checked={add.medical_history.includes("Tiểu đường")}
-                            //onChange={() => handleCheckboxChange("Tiểu đường")}
-                            />
-                            Tiểu đường
-                        </label>
-                    </div>
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Dạ dày"
-                            //checked={add.medical_history.includes("Dạ dày")}
-                            //onChange={() => handleCheckboxChange("Dạ dày")}
-                            />
-                            Dạ dày
-                        </label>
-                    </div>
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Phổi"
-                            //checked={add.medical_history.includes("Phổi")}
-                            //onChange={() => handleCheckboxChange("Phổi")}
-                            />
-                            Phổi
-                        </label>
-                    </div>
-                    <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Truyền nhiễm"
-                            //checked={add.medical_history.includes("Truyền nhiễm")}
-                            //onChange={() => handleCheckboxChange("Truyền nhiễm")}
-                            />
-                            Truyền nhiễm
-                        </label>
-                    </div>
-                        <div className='form-check'>
-                        <label>
-                            <input
-                            type="checkbox"
-                            id ='medical_history'
-                            name = 'medical_history'
-                            value="Thai sản"
-                            //checked={add.medical_history.includes("Thai sản")}
-                            //onChange={() => handleCheckboxChange("Thai sản")}
-                            />
-                            Thai sản
-                        </label>
-                    </div>
-                
+                    <Form>
+                        <fieldset disabled>
+                            {/* {detailData.map((item) => ( */}
+                                <Row className="mb-3">
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledTextInput">Số hồ sơ</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.idnumber} />
+                                    </Form.Group>
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledSelect">Họ và tên</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.name} />
+                                    </Form.Group>
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledSelect">Tuổi</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.age} />
+                                    </Form.Group>
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledSelect">Ngày tháng năm sinh</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.birthday} />
+                                    </Form.Group>
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledSelect">Giới tính</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.gender} />
+                                    </Form.Group>
+                                </Row>
+                                <Row className="mb-3">
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledTextInput">Địa chỉ</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.address} />
+                                    </Form.Group>
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledSelect">Lý do khám</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.reason} />
+                                    </Form.Group>
+                                    <Form.Group as={Col}>
+                                        <Form.Label htmlFor="disabledSelect">Tiền sử bệnh</Form.Label>
+                                        <Form.Control id="disabledTextInput" placeholder={detailData.medical_history} />
+                                    </Form.Group>
+                                </Row> 
+                        </fieldset>
+                    </Form>
                 </div>
             </div>
+            <br/>
             <Row>
                 <Col>
-                <div className="chandoan">
-                    <label htmlFor="sohoso" className="form-label">Chẩn đoán và điều trị</label>
-                    <input type='text' 
-                    className='form-control' 
-                    id='chandoan' 
-                    name='chandoan'
-                    
-                    > 
-                    </input>
-                </div>
-                </Col>
-                <Col>
-                <div className="sohoso">
-                    <label htmlFor="sohoso" className="form-label">Ngày khám</label>
-                    <input type='date' 
-                    className='form-control' 
-                    id='ngaykham' 
-                    name='ngaykham'
-                    
-                    > 
-                    </input>
-                </div>
-                </Col>
-                <Col>
-                    <Row>
-                        <Col >
-                            <Button className="button" onClick={()=>setThuthuat(true)}>Khám bệnh</Button>
-                            {<Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)} nhomthuthuat={nhomthuthuat} />}
+                        <Button className="button" onClick={()=>setThuthuat(true)}>Khám bệnh</Button>
+                        {<Thuthuat show={thuthuat} onHide={()=>setThuthuat(false)} nhomthuthuat={nhomthuthuat} />}
 
-                            <Button className="button" onClick={()=> setPayment(true)}>Thanh toán</Button>
-                            <Payment show={payment} onHide={()=>setPayment(false)}/>
-                            
-                            <Button className="button" onClick={()=>setOpendonthuoc(true)}>Đơn thuốc</Button>
-                            <Donthuoc show={opendonthuoc} onHide={()=>setOpendonthuoc(false)}/>
+                        <Button className="button" onClick={()=> setPayment(true)}>Thanh toán</Button>
+                        <Payment show={payment} onHide={()=>setPayment(false)}/>
+                        
+                        <Button className="button" onClick={()=>setOpendonthuoc(true)}>Đơn thuốc</Button>
+                        <Donthuoc show={opendonthuoc} onHide={()=>setOpendonthuoc(false)}/>
 
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col >
-                            <Button className="button" onClick={()=>setLichhen(true)}>Lịch hẹn</Button>
-                            <Lichhen show={lichhen} onHide={()=>setLichhen(false)} onLichhenData = {(reminder) => handleLichhenData(reminder)}/>
+                        <Button className="button" onClick={()=>setLichhen(true)}>Lịch hẹn</Button>
+                        <Lichhen show={lichhen} onHide={()=>setLichhen(false)} onLichhenData = {(reminder) => handleLichhenData(reminder)}/>
 
-                            <Button className="button">In bệnh án</Button>
-                            <Button className="button">Lưu</Button>
-                        </Col>
-                    </Row>
+                        <Button className="button">In bệnh án</Button>
+                        <Button className="button">Lưu</Button>
                 </Col>
             </Row>
             <hr/>
             <div className="chi-tiet-kham-benh">
                 <div className="header">
-                    <h5>Chi tiết khám bệnh</h5>
-                    <Button className="button" onClick={refreshData}>REFRESH</Button>
+                    <div className="header1">
+                        <h5>Chi tiết khám bệnh</h5>
+                        <button className="btn refreshbutton rounded-circle" variant="light" style={{color:"black"}} onClick={refreshData}>
+                            <i class='bx bx-refresh' style={{fontSize:"25px"}}></i>
+                        </button>
+                    </div>
+                    <div className="detailmedicine">
+                        <MedicineInfo datadonthuoc={filterdonthuoc}/>
+                    </div>
                 </div>
                 <div className="tablengaykham ">
                     <div className="table-wrapper">
-                        <table className="ngaykham table-bordered">
+                        <table className="ngaykham table-borderless table-responsive-lg">
                             <thead>
                                 <tr>
-                                    {/* <th>STT</th> */}
                                     <th>Ngày khám</th>
                                 </tr>
                             </thead>
                         </table>
                         <div className="tbody-wrapper">
-                        <table className="ngaykham table-bordered">
+                        <table className="ngaykham table-striped table-borderless table-responsive-lg">
                             <tbody>
                                 {ngaykham ? (
                                     ngaykham.map((item, index) => {
                                         return (
-                                            <tr key={index} onClick={()=> handleDoubleClick(item.ngaykham)} style={{cursor:"pointer"}}>
-                                                {/* <td></td> */}
-                                                <td>{item.ngaykham}</td>
+                                            <tr key={index} onClick={()=> handleDoubleClick(item.create_time)} style={{cursor:"pointer"}}>
+                                                <td>{item.create_time}</td>
                                             </tr>
                                         );
                                     })
@@ -481,7 +285,7 @@ function Treatment() {
                         </div>
                     </div>
                     <div className="table-wrapper-2">
-                        <table className="thongtinkhac table-bordered">
+                        <table className="thongtinkhac table-borderless table-responsive-lg">
                             <thead>
                                 <tr>
                                     <th className="rang">Răng</th>
@@ -497,35 +301,64 @@ function Treatment() {
                             </thead>
                         </table>
                         <div className="tbody-wrapper">
-                        <table className="thongtinkhac table-bordered">
+                        <table className="thongtinkhac table-hover table-striped table-borderless table-responsive-lg">
                             <tbody>
-                                {filter ? (
-                                    filter.map((item)=> {
-                                        let percent = item.thanh_tien * item.percent / 100;
-                                        //console.log(item)
+                                {filterthuthuat ? (
+                                    filterthuthuat.map((item)=> {
+                                        let sotiengiamgia = item.percent > 0 ? (item.thanh_tien * item.percent / 100 ) : 0;
+                                        item.giam_gia = sotiengiamgia
                                         return (
                                             <tr key={item._id}>
-                                                <td className="rang"></td>
+                                                <td className="rang">
+                                                    <input
+                                                    type="text"
+                                                    name="rang"
+                                                    value = {item.tooth_number}
+                                                    style={{width:"100%", border:"none"}}
+                                                    />
+                                                </td>
                                                 <td className="tenthuthuat">{item.ten_thu_thuat}</td>
-                                                <td className="noidungthuthuat"></td>
+                                                <td className="noidungthuthuat">
+                                                    <input
+                                                    type="text"
+                                                    name="noidungthuthuat"
+                                                    value={item.noi_dung_thu_thuat}
+                                                    style={{width:"100%", border:"none"}}
+                                                    />
+                                                </td>
                                                 <td className="soluong">{item.so_luong}</td>
-                                                <td className="dongia">{item.don_gia}</td>
-                                                <td className="thanhtien">{item.thanh_tien}</td>
+                                                <td className="dongia">{item.don_gia.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                                                <td className="thanhtien">{item.thanh_tien.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
                                                 <td className="percent">
-                                                    {/* <input
+                                                    <input
                                                     type="number"
                                                     name="percent"
                                                     value={item.percent}
-                                                    onChange={(e)=>{
-                                                        let val = e.target.value
-                                                        item.percent = val
-                                                        setFilter([...filter])
-                                                        
+                                                    onChange={(e) => {
+                                                        let val = e.target.value;
+                                                        item.percent = val;
+                                                        setFilterthuthuat([...filterthuthuat])
                                                     }}
-                                                    /> */}
+                                                    style={{width:"100%", border:"none"}}
+                                                    />
                                                 </td>
-                                                <td className="giamgia"></td>
-                                                <td className="lydogiam"></td>
+                                                <td className="giamgia">
+                                                    <input
+                                                    type="number"
+                                                    name="percent"
+                                                    value={sotiengiamgia}
+                                                    style={{width:"100%", border:"none"}}
+                                                    disabled
+                                                    />
+                                                </td>
+                                                <td className="lydogiam">
+                                                    <input
+                                                    type="text"
+                                                    name="lydogiam"
+                                                    value={item.lydogiam}
+                                                    style={{width:"100%", border:"none"}}
+                                                    />
+                                                </td>
                                             </tr>
                                         );
                                     })
@@ -537,26 +370,35 @@ function Treatment() {
                 </div>
             </div>
         </div>
+    
     <div className="footertest">
         <ul className="nav">
-            <div className='totalprice' style={{paddingLeft:"20px"}}>
+            <div className='totalprice' style={{paddingLeft:"100px"}}>
                 <label htmlFor='totalprice' className='form-label'>TỔNG THANH TOÁN</label>
                 <input type='text' 
                 className='form-control' 
+                style={{
+                    width:"200px"
+                }}
+                value={calcucateTotalPrice()}
                 > 
                 </input>
             </div>
-            <div className='totalsell' style={{paddingLeft:"20px"}}>
+            <div className='totalsell' style={{paddingLeft:"100px"}}>
                 <label htmlFor='totalprice' className='form-label'>TỔNG KHUYẾN MÃI</label>
                 <input type='text' 
                 className='form-control' 
+                value={calculateSale()}
                 > 
                 </input>
             </div>
-            <div className='totalpay' style={{paddingLeft:"20px"}}>
+            <div className='totalpay' style={{paddingLeft:"100px"}}>
                 <label htmlFor='totalprice' className='form-label'>TỔNG SỐ TIỀN ĐÃ THANH TOÁN</label>
                 <input type='text' 
-                className='form-control' 
+                className='form-control'
+                style={{
+                    width:"200px"
+                }} 
                 > 
                 </input>
             </div>

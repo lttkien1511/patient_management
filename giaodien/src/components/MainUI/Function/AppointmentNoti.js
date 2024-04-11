@@ -37,6 +37,14 @@ function AppointmentNoti ({reminder}) {
     
     useEffect(()=> {
         getAllAppointment();
+        count_unread_reminder()
+        .then((unreadCount) => {
+            setBadgeCount(unreadCount);
+        })
+        .catch((error) => {
+            console.error(error);
+        })
+        ;
     },[reminder]);
 
 

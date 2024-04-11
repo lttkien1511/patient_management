@@ -3,114 +3,99 @@ import React, { useEffect, useState } from "react";
 import  Modal  from 'react-bootstrap/Modal';
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
+import Table from 'react-bootstrap/Table';
+import { insertData , getMedicineData} from "../../../model/list_medicine";
+import { GenericTable } from "../../../helper/table";
+import moment from "moment";
 
 function Donthuoc (props) {
     const [detailData, setDetailData] = useState({});
     const [data, setData] = useState([]);
     const [donthuocdata, setDonthuocdata] = useState([]);
     const {idnumber} = useParams();
-    
-    const [filterType, setFilterType] = useState("and");
-    const [nguoikevalue, setNguoikevalue] = useState('BS Lan');
+
+    const [nguoikevalue, setNguoikevalue] = useState('');
+    const [selectedDate, setSelectedDate] = useState('');
+    const today = new Date();
+
+    // const formatNgayke = (dt) => {
+    //     //Format ngày kê theo định dạng %d/%m/%Y
+    //     const date = new Date(dt);
+    //     let day = date.getDate();
+    //     day = day < 10 ? "0" + day : day;
+    //     let month = date.getMonth() + 1;
+    //     month = month < 10 ? "0" + month : month;
+    //     let year = date.getFullYear();
+
+    //     //return `${day}/${month}/${year}`;
+    //     return `${year}-${month}-${day}`
+    // }
+
+    const handleDateChange = (e) => {
+        const dateValue= e.target.value;
+        setSelectedDate(dateValue ? dateValue : moment(today).format('DD/MM/YYYY'));
+        const formattedDate = moment(dateValue).format('DD/MM/YYYY');
+        console.log(formattedDate); 
+    }
     
 
     const onShow = () => {
-        getAllMedicine()
-    }
-
-    const handleNguoiKeChange = (e) => {
-        setNguoikevalue(e.target.value);
-        //setDonthuocdata(nguoikevalue);
-        setDonthuocdata(prevdonthuocdata =>  (prevdonthuocdata.map(item => ({
-            item,
-            nguoikevalue
-        }))))
-    }
-
+        getAllMedicine();
+    } 
+    
     const handleSave = () => {
-        console.log(donthuocdata);
-        let data = JSON.stringify(donthuocdata);
-        let config = {
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: `http://127.0.0.1:8000/donthuocbenhnhan/${idnumber}`,
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            data: data
-            };
-            axios.request(config)
-            .then((response) => {
-            const savedata = response.data;
-            console.log(JSON.stringify(savedata));
-            Swal.fire({
-                icon: 'success',
-                title: 'Đơn thuốc mới cho bệnh nhân đã được thêm vào',
-                showConfirmButton:false,
-                timer:2000
-            })
-            })
-            .catch((error) => {
+        insertData(donthuocdata, idnumber).then((response) => {
+            if (response) {
+                window.makeAlert('success', 'Đơn thuốc mới cho bệnh nhân đã được thêm vào');
+            }
+        })
+        .catch((error) => {
             console.log(error);
-            });
+        });
+        // console.log(donthuocdata);
+        // let data = JSON.stringify(donthuocdata);
+        // let config = {
+        //     method: 'post',
+        //     maxBodyLength: Infinity,
+        //     url: `http://127.0.0.1:8000/donthuoc/insertData?idnumber=${idnumber}`,
+        //     headers: { 
+        //         'Content-Type': 'application/json'
+        //     },
+        //     data: data
+        //     };
+        //     axios.request(config)
+        //     .then((response) => {
+        //     const savedata = response.data;
+        //     console.log(JSON.stringify(savedata));
+            
+        //     Swal.fire({
+        //         icon: 'success',
+        //         title: 'Đơn thuốc mới cho bệnh nhân đã được thêm vào',
+        //         showConfirmButton:false,
+        //         timer:2000
+        //     })
+        //     })
+            // .catch((error) => {
+            // console.log(error);
+            // });
     }
 
     const getAllMedicine = () => {
-        axios.get(`http://127.0.0.1:8000/danhsachtoanbodonthuoc`)
-        .then((response) => {
-            setData(response.data);
+        getMedicineData().then((response) => {
+            if (response) {
+                setData(response.data);
+            }
         })
-        .catch((error) => {
-            console.error('Lỗi khi tải dữ liệu chi tiết: ',error);
-        })
+        // axios.get(`http://127.0.0.1:8000/donthuoc/getall`)
+        // .then((response) => {
+        //     setData(response.data.data);
+        // })
+        // .catch((error) => {
+        //     console.error('Lỗi khi tải dữ liệu chi tiết: ',error);
+        // })
     };
     
-    const formatDate = (date) => {
-        const parts = date.split('-');
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      };
-
-    const handleFilter =(ngayke) => {
-        const formattedDate= formatDate(ngayke);
-        let data = JSON.stringify({
-            filter_type: filterType,
-            condition: {
-                "idnumber":{
-                    "logic": "=",
-                    "value": idnumber
-                },
-                "ngaykham": {
-                    "logic": "=",
-                    "value": formattedDate
-                }
-            }
-        });
-        
-        let config = {
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: 'http://127.0.0.1:8000/donthuoctheongay/',
-            headers: { 
-              'Content-Type': 'application/json'
-            },
-            data : data
-          };
-          
-        axios.request(config)
-        .then((response) => {
-        const result = response.data;
-        console.log(JSON.stringify(result));
-        
-        //setFilter(ngayke);
-        //setDonthuocdata(ngayke);
-        })
-        .catch((error) => {
-        console.log(error);
-        });
-    }
-
     
-      
     const handleRemove = (item) => {
         const updatedselected = donthuocdata.filter((donthuoc) => donthuoc !== item);
         setDonthuocdata(updatedselected); 
@@ -118,7 +103,7 @@ function Donthuoc (props) {
 
     useEffect(()=> {
         axios
-        .get(`http://127.0.0.1:8000/getAllData/${idnumber}`)
+        .get(`http://127.0.0.1:8000/patient/getDetailData?idnumber=${idnumber}`)
         .then((response) => {
             setDetailData(response.data);
         })
@@ -203,7 +188,6 @@ function Donthuoc (props) {
     }
 
 
-
     return (
         <Modal show={props.show} onHide={props.onHide} onShow={() => {
             onShow()
@@ -215,22 +199,21 @@ function Donthuoc (props) {
             <Modal.Body>
                 <div className="ngaykevanguoike">
                     <div className="ngayke">
-                        <label htmlFor="ngayke" className="form-label">Ngày kê</label>
+                        <label htmlFor="todayDate" className="form-label">Ngày kê</label>
                         <input 
                         className='form-control' 
-                        id='date' 
                         name='ngayke'
                         type="date" 
-                                 
+                        value={selectedDate}
+                        onChange={handleDateChange}
                         /> 
-                        
                     </div>
+                    
                     <div className='nguoike'>
                         <label htmlFor='nguoike' className='form-label'>Người kê</label>
                         <select className='form-control'
                         name='nguoike'
-                        value={nguoikevalue}
-                        onChange={handleNguoiKeChange}
+                        // value={}
                         
                         >
                             <option value="BS Lan">BS Lan</option>
@@ -238,10 +221,10 @@ function Donthuoc (props) {
                         </select>
                     </div>
                 </div>
-                <div id="donthuoc">
+                
                 <div className="danhmucthuoc">
                     <div className="table-wrapper">
-                        <table className="table table-bordered table-responsive-lg" 
+                        <Table hover className="table table-striped table-borderless table-responsive-lg" 
                         style={{ overflowY: "auto", maxHeight: "300px"}}>
                             <thead>
                                 <tr>
@@ -255,7 +238,6 @@ function Donthuoc (props) {
                             <tbody>
                                 {data.map((item) => {
                                 const dt = item._id;
-                                //const isSelected = selected.includes(dt);
                                 return (
                                     <tr key={dt} 
                                     style={{cursor:"pointer"}}
@@ -266,8 +248,8 @@ function Donthuoc (props) {
                                             donvi:  item.donvi,
                                             soluong: item.soluong,
                                             huongdan: item.huongdan,
-                                            //nguoike: item.nguoike
-                                            nguoike: nguoikevalue
+                                            ngayke: item.ngayke,
+                                            nguoike: item.nguoike
                                         }])
                                     }}
                                     >
@@ -277,13 +259,22 @@ function Donthuoc (props) {
                                     );
                                 })}
                             </tbody>
-                        </table>
+                        </Table>
                     </div>
                 </div>
                 <div className="donthuocduocchon">
                     <div className="table-wrapper">
-                        <table className="table table-bordered table-responsive-lg" 
+                        <Table hover className="table-striped table-borderless table-responsive-lg" 
                             style={{ overflowY: "auto", maxHeight: "300px"}}>
+                                <style>
+                                    {`
+                                    input::-webkit-outer-spin-button,
+                                    input::-webkit-inner-spin-button {
+                                        -webkit-appearance: none;
+                                            margin: 0;
+                                    }`
+                                    }
+                                </style>
                                 <thead>
                                     <tr>
                                         <th colSpan="3">Đơn thuốc cho bệnh nhân</th>
@@ -312,8 +303,8 @@ function Donthuoc (props) {
                                                     let val = e.target.value;
                                                     item.soluong = val;
                                                     setDonthuocdata([...donthuocdata]);
-                                                    //setFilter([...filter]);
                                                 }}
+                                                style={{border:"none"}}
                                                 />
                                             </td>
                                             <td>
@@ -325,20 +316,20 @@ function Donthuoc (props) {
                                                     let val = e.target.value;
                                                     item.huongdan = val;
                                                     setDonthuocdata([...donthuocdata]);
-                                                    //setFilter([...filter]);
                                                 }}
-                                                style={{width:"100%"}}
+                                                style={{width:"100%", border:"none"}}
                                                 />
                                             </td>
                                         </tr>
                                         );
                                     })}
                                 </tbody>
-                            </table>
+                            </Table>
                     </div>
                 </div>
-                </div>
+                {/* </div> */}
             </Modal.Body>
+            
             <Modal.Footer>
                 <button type="submit" className="btn btn-primary" onClick={handleSave}>
                     LƯU
@@ -348,7 +339,9 @@ function Donthuoc (props) {
                 </button> 
                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={props.onHide}>ĐÓNG LẠI</button>
             </Modal.Footer>
+            
         </Modal>
+        
     )
 }
 

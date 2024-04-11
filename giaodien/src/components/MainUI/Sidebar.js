@@ -43,19 +43,19 @@ function Sidebar (props) {
                         <a href="#" className="nav-link text-dark" onClick={()=>setProceduregroup(true)} >
                             Danh sách nhóm thủ thuật
                         </a>
-                        {proceduregroup && <ProcedureGroup show={proceduregroup} onHide={() => setProceduregroup(false)}/>}
+                        <ProcedureGroup show={proceduregroup} onHide={() => setProceduregroup(false)}/>
                     </li>
                     <li className="nav-item">
                         <a href="#" className="nav-link text-dark" onClick={()=>setMedicine(true)}>
                             Danh sách đơn thuốc
                         </a>
-                        {medicine && <Medicine show={medicine} onHide={() => setMedicine(false)}/>}
+                        <Medicine show={medicine} onHide={() => setMedicine(false)}/>
                     </li> 
                     <li className="nav-item">
                         <a href="#" className="nav-link text-dark" onClick={()=>setAppointmentList(true)}>
                             Danh sách lịch hẹn
                         </a>
-                        {appointmentList && <AppointmentList show={appointmentList} onHide={() => setAppointmentList(false)}/>}
+                        <AppointmentList show={appointmentList} onHide={() => setAppointmentList(false)}/>
                     </li> 
                 </ul>
                 <hr/>

@@ -15,6 +15,15 @@
     /* height:300px; */
 }
 
+.thuthuatdieutri .nhomthuthuat table th {
+    background-color: #a2b9bc;
+    color: white;
+}
+
+.thuthuatdieutri .thuthuatduocchon table th {
+    background-color: #a2b9bc;
+    color: white;
+}
 
 .thuthuatdieutri .modal-body {
     display: inline-block;
@@ -38,6 +47,15 @@
     /* display: inline-block; */
 }
 
+.thuthuatdieutri .card {
+    position: absolute;
+    background-color: #383838;
+    /* border-radius: 5px;  */
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+}
+
 .donthuoc .table-wrapper {
     height: 600px;
     overflow: auto;
@@ -49,15 +67,15 @@
     margin-right: 5px;
 }
 
-.thuthuatdieutri .card {
-    position: absolute;
-    background-color: #383838;
-    /* border-radius: 5px;  */
-    border-style: solid;
-    border-width: 1px;
-    box-sizing: border-box;
+.donthuocchobenhnhan .danhmucthuoc table th {
+    background-color: #a2b9bc;
+    color: white;
 }
 
+.donthuocchobenhnhan .donthuocduocchon table th {
+    background-color: #a2b9bc;
+    color: white;
+}
 
 .donthuocchobenhnhan .modal-content {
     width: 1500px;

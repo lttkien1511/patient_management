@@ -30,7 +30,7 @@ function Login () {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'http://127.0.0.1:8000/login',
+            url: 'http://127.0.0.1:8000/login/login',
             headers: { 
             'Authorization': `Basic ${base64Credentials}`, 
             }

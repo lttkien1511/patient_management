@@ -6,11 +6,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: -15px;
 }
 
 .PatientInfo .d-flex .NotiList {
   display: flex;
 }
+
+.PatientInfo .funcbutton {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+.PatientInfo table th {
+  background-color: #a2b9bc;
+  color: white;
+}
+
 
 .search-form {
   padding-left: 30px;
@@ -24,19 +36,15 @@
   color: #111;
 }
 
-.form-control {
-  width: 140px;
-}
-
 .thong-tin-benh-nhan {
-  background-color:beige;
-  border-style: groove;
-  padding-bottom: 12px;
+  background-color:#b1cdd0;
+  padding-bottom: 10px;
+  width: 100%;
+  /* color: white; */
 }
 
 .Treatment {
   margin-top: 10px;
-  
 }
 
 .Treatment .d-flex {
@@ -45,7 +53,15 @@
   justify-content: space-between;
 }
 
+.Treatment .btn.backtomainpage {
+  display: flex;
+  align-items: center;
+}
+
 .Treatment .d-flex .NotiList {
+  display: flex;
+}
+.Treatment .d-flex .congcu {
   display: flex;
 }
 
@@ -55,29 +71,18 @@
 }
 
 .Treatment .btnmenu-1:hover {
-  background-color: antiquewhite;
+  background-color: white;
 }
+
+
 .Treatment .btnmenu-2:hover {
   background-color: antiquewhite;
 }
 
-
-
-.Treatment .gioitinh .form-control {
-  width: 100px;
+.Treatment .refreshbutton:hover {
+  background-color: antiquewhite;
 }
 
-.Treatment .sohoso {
-  margin-right: 10px;
-}
-
-.Treatment .lydokham {
-  margin-left: 30px;
-}
-
-.Treatment .diachi .form-control {
-  width: 400px
-}
 
 .tien-su-benh {
   background-color:bisque;
@@ -90,31 +95,50 @@
   margin-bottom: 5px;
 }
 
-.Treatment .chandoan .form-control{
-  width: 400px;
+.Treatment .form-control{
+  border: 0px solid;
+  border-bottom-width: 1px;
+  background-color: transparent;
+}
+
+.Treatment .form-label {
+  font-weight: bold ;
 }
 
 .Sidebar .nav-item:hover {
   background-color: antiquewhite;
 }
 
-.Treatment .chi-tiet-kham-benh .header {
+.Treatment .header {
   display: flex;
   position: relative;
   align-items: center;
+  margin-top: -10px;
   justify-content: space-between;
 }
-.Treatment .chi-tiet-kham-benh .header .button {
-  float: right;
-} 
 
-.Treatment .tablengaykham .table-wrapper {
-  overflow: auto;
-  display: inline-block;
+.Treatment .chi-tiet-kham-benh .header .header1 {
+  display: flex;
+  position: relative;
+  align-items:center;
+  gap:5px;
+  margin-top: -10px;
+  /* justify-content: space-between; */
 }
 
-.Treatment .tablengaykham .table-wrapper table {
-  /* width: 100%; */
+.Treatment .detailmedicine {
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.Treatment .tablengaykham .table-wrapper {
+  /* overflow: auto;
+  display: inline-block; */
+  width: 150px;
+  table-layout: fixed;
+}
+
+/* .Treatment .tablengaykham .table-wrapper table {
   table-layout: fixed;
   width: 150px;
 }
@@ -122,23 +146,22 @@
 .Treatment .tablengaykham .table-wrapper .tbody-wrapper {
   height: 180px;
   overflow-y: auto;
-}
+} */
 
 .Treatment .tablengaykham .table-wrapper-2 {
-  overflow: auto;
-  display: inline-block;
+  /* overflow: auto;
+  display: inline-block; */
+  table-layout: fixed;
 }
 
-.Treatment .tablengaykham .table-wrapper-2 table {
+/* .Treatment .tablengaykham .table-wrapper-2 table {
   table-layout: fixed;
 }
 
 .Treatment .tablengaykham .table-wrapper-2 .tbody-wrapper {
   height: 180px;
   overflow: auto;
-}
-
-
+} */
 
 .Treatment .tablengaykham {
   justify-content: space-between;
@@ -186,9 +209,13 @@
   bottom: 0;
   /* text-align: center; */
   position: fixed;
-  height:130px;
+  height:100px;
   width: 100%;
-  /* background-color: rgb(246, 248, 209); */
-
+  background-color: rgb(246, 248, 209);
 }
+
+.Treatment .tablengaykham table th {
+  background-color: #a2b9bc;
+}
+
 

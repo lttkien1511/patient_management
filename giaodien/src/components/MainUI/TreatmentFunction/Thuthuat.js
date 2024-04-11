@@ -1,9 +1,12 @@
 import React, { useState, useEffect} from "react";
 import  Modal  from 'react-bootstrap/Modal';
 import "./thuthuat.css";
-import axios from "axios";
 import { useParams } from "react-router-dom";
-import Swal from "sweetalert2";
+import Table from 'react-bootstrap/Table';
+import Form from 'react-bootstrap/Form';
+import { getProcedureGroup , getProcedure } from "../../../model/thuthuat";
+import { addTreatment } from "../../../model/treatmentFunction";
+
 
 function Thuthuat (props) {
         
@@ -11,63 +14,49 @@ function Thuthuat (props) {
     const [thuthuatGroup, setThuthuatGroup] = useState([]);
     const [thuthuatdata, setThuthuatdata] = useState([]);
     const [thuthuatchosen, setThuthuatchosen] = useState([]);
+    const [tennhom, setTennhom] = useState('');
+    const [selectedRow, setSelectedRow] = useState(null);
     
-    const handleSave = () => {
-        console.log(thuthuatchosen)
-        
-        let data = JSON.stringify(thuthuatchosen);      
-        let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: `http://127.0.0.1:8000/thuthuatbenhnhan/${idnumber}`,
-        headers: { 
-            'Content-Type': 'application/json'
-        },
-        data: data
-        };
-        axios.request(config)
-        .then((response) => {
-        const savedata = response.data;
-        console.log(JSON.stringify(savedata));
-        Swal.fire({
-            icon: 'success',
-            title: 'Thủ thuật mới cho bệnh nhân đã được thêm vào',
-            showConfirmButton:false,
-            timer:2000
-        })
-        })
-        .catch((error) => {
-        console.log(error);
-        });
-    }
 
     const onShow = ()=>{
         getAllGroup()
-
     }
     
-
     const getAllGroup = () => {
-        axios.get(`http://127.0.0.1:8000/getallnhomthuthuat`)
-        .then((response) => {
-            setThuthuatGroup(response.data.allgroup);
-            })
-            .catch((error) => {
-            console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
-            });
-    }
-
-    const handleClick = (item) => {
-        console.log(item);
-        axios
-        .get(`http://127.0.0.1:8000/getthuthuat/${item}`)
-        .then((response) => {
-            setThuthuatdata(response.data);
+        getProcedureGroup().then((response) => {
+            if (response) {
+                setThuthuatGroup(response.data);
+            }
         })
         .catch((error) => {
-        console.error('Error when fetching group details: ', error);
-        });
-      };
+            console.log(error);
+            window.makeAlert('error', 'Error', error);
+        })
+    };
+
+    const handleGetThuThuat = (id) => {
+        getProcedure(id).then((response) => {
+            if (response) {
+                console.log(response.data);
+                setThuthuatdata(response.data[0]);
+                setTennhom(response.data[1]);
+                setSelectedRow(id);
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+            window.makeAlert('error', 'Error', error);
+        })
+    }
+
+    const handleSave = () => {
+        addTreatment(thuthuatchosen, idnumber).then((response) => {
+            if (response) {
+                window.makeAlert('success', 'Thủ thuật mới cho bệnh nhân đã được thêm vào');
+            }
+        })
+    }
+
     
     const handleRemove = (item) => {
         const updatedselected = thuthuatchosen.filter((thuthuat) => thuthuat !== item);
@@ -87,14 +76,13 @@ function Thuthuat (props) {
         <Modal.Body>
             <div className="nhomthuthuat">
                 <div className="table-wrapper">
-                    <table className="table table-bordered table-responsive-lg" style={{ overflowY: "auto", maxHeight: "300px"}}>
+                    <Table hover className="table table-striped table-borderless table-responsive-lg" style={{ overflowY: "auto", maxHeight: "300px"}}>
                         <thead>
                             <tr>
                                 <th colSpan="2">NHÓM THỦ THUẬT</th>
                             </tr>
                             <tr>
-                                <th style={{width:"15px"}}>STT</th>
-                                <th>TÊN NHÓM</th>
+                                <th colSpan="2">TÊN NHÓM</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,25 +91,38 @@ function Thuthuat (props) {
                             return (
                                 <tr key={item._id} 
                                 >
-                                    <td></td>
-                                    <td onClick={()=>handleClick(nhomthuthuatId)} style={{cursor:'pointer'}}>{item.ten_nhom_thu_thuat}</td>
+                                    <td 
+                                    onClick={()=>handleGetThuThuat(nhomthuthuatId)} 
+                                    style={{cursor:'pointer',textAlign:"center"
+                                }}
+                                    >
+                                        {item.procedureGroup}
+                                    </td>
+                                    <td>
+                                        <Form.Check aria-label={`Select row ${nhomthuthuatId}`} 
+                                            checked={selectedRow === nhomthuthuatId}
+                                            style={{ border: 'none' }}
+                                        >
+
+                                        </Form.Check>
+                                    </td>
                                 </tr>
                                 );
                             })}
                         </tbody>
-                    </table>
+                    </Table>
                 </div>
             </div>
 
             <div className="nhomthuthuat">
                 <div className="table-wrapper">
-                    <table className="table table-bordered table-responsive-lg" style={{ overflowY:"auto"}}>
+                    <Table hover className="table table-striped table-borderless table-responsive-lg" style={{ overflowY:"auto"}}>
                         <thead>
                             <tr>
-                                <th colSpan="3">THỦ THUẬT</th>
+                                <th colSpan="3">DANH SÁCH THỦ THUẬT CỦA NHÓM : {tennhom} </th>
                             </tr>
                             <tr>
-                                <th>STT</th>
+                                {/* <th>STT</th> */}
                                 <th>TÊN THỦ THUẬT</th>
                                 <th>ĐƠN GIÁ</th>          
                             </tr>
@@ -130,33 +131,44 @@ function Thuthuat (props) {
                             {thuthuatdata ? (
                                 thuthuatdata.map((item) => (
                                 <tr key={item._id} 
+                                style={{cursor:"pointer",textAlign:"center"}} 
                                 >
-                                    <td></td>
-                                    <td style={{cursor:"pointer"}} onClick={()=>{
+                                    {/* <td></td> */}
+                                    <td onClick={()=>{
                                         setThuthuatchosen([...thuthuatchosen, {
                                             so_luong: 1,
                                             thuthuatid: item._id,
-                                            ten_thu_thuat: item.ten_thu_thuat,
+                                            procedure: item.procedure,
                                             don_gia: item.don_gia,
-                                            thanh_tien: item.thanh_tien,
-
+                                            thanh_tien: item.thanh_tien
+                                            
                                         }])
-                                    }}>{item.ten_thu_thuat}</td>
+                                    }}>{item.procedure}</td>
                                     <td>{item.don_gia}</td>
                                 </tr>
                             )) ):null}
                         </tbody>
-                    </table>
+                    </Table>
                 </div>
             </div>
             <div className="thuthuatduocchon">
-                <table className="table table-bordered" >
+                {/* <div className="table-wrapper"> */}
+                <Table hover className="table table-striped table-borderless table-responsive-lg">
+                    <style>
+                        {`
+                        input::-webkit-outer-spin-button,
+                        input::-webkit-inner-spin-button {
+                            -webkit-appearance: none;
+                                margin: 0;
+                        }`
+                        }
+                    </style>
                     <thead>
                         <tr>
                             <th colSpan="7">THỦ THUẬT ĐƯỢC LỰA CHỌN</th>
                         </tr>
                         <tr>
-                            <th>STT</th>
+                            {/* <th>STT</th> */}
                             <th>TÊN THỦ THUẬT</th>
                             <th>SỐ LƯỢNG</th>
                             <th>ĐƠN GIÁ</th>
@@ -173,10 +185,10 @@ function Thuthuat (props) {
                             return (
                             <tr key={item._id} 
                             
-                            style={{cursor:"pointer"}}
+                            style={{cursor:"pointer", textAlign:"center"}}
                             >
-                                <td></td>
-                                <td onDoubleClick={() => handleRemove(item)}>{item.ten_thu_thuat}</td>
+                                {/* <td></td> */}
+                                <td onDoubleClick={() => handleRemove(item)}>{item.procedure}</td>
                                 <td>
                                     <input 
                                     type='number'
@@ -186,8 +198,8 @@ function Thuthuat (props) {
                                         let val = e.target.value
                                         item.so_luong = val;
                                         setThuthuatchosen([...thuthuatchosen])
-                                        
                                     }}
+                                    style={{border:"none"}}
                                     />
                                 </td>
                                 <td>{item.don_gia}</td>
@@ -199,7 +211,8 @@ function Thuthuat (props) {
                         );}) ):null
                         }
                     </tbody>
-                </table>
+                </Table>
+                {/* </div> */}
             </div>
             
         </Modal.Body>

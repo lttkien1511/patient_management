@@ -3,28 +3,24 @@ import  Modal  from 'react-bootstrap/Modal';
 //import "./thuthuat.css";
 //import "../TreatmentFunction/thuthuat.css";
 import Button from "react-bootstrap/esm/Button";
-import axios from "axios";
-//import { useParams } from "react-router-dom";
-import Swal from "sweetalert2";
 import Addnhom from "../TreatmentFunction/Nhomthuthuat/Addnhom";
 import Addthuthuat from "../TreatmentFunction/Nhomthuthuat/Addthuthuat";
-
+import { getProcedureGroup , getProcedure ,deleteProcedureGroup ,deleteProcedure } from "../../../model/thuthuat";
 
 
 function ProcedureGroup (propdata) {
     
     const [data, setData] = useState([]);
-    //const {idnumber} = useParams();
+    
     const [thuthuatdata, setThuthuatdata] = useState([]);
     const [thuthuatchosen, setThuthuatchosen] = useState([]);
     
-    //const [soluong, setSoluong] = useState("");
     const [thuthuatid, setThuthuatid] = useState("");
-    //const [ten_thu_thuat, setTenthuthuat] = useState("");
-    
+    const [nhomthuthuat, setNhomthuthuat] = useState("");
 
-    //const [don_gia, setDongia] =useState(0);
-    //const [thanh_tien, setThanhtien]= useState(0);
+    const onShow = () => {
+        handleRefresh();
+    }
 
     const [addnhomthuthuat, setAddnhomthuthuat] = useState(false);
     const [addthuthuat, setAddthuthuat] = useState(false);
@@ -71,106 +67,80 @@ function ProcedureGroup (propdata) {
         };
     }, []);
 
-    const deleteNhom = (nhomthuthuat) => {
-        console.log(nhomthuthuat);
-        axios
-        .delete(`http://127.0.0.1:8000/xoanhomthuthuat?id=${nhomthuthuat}`)
-        .then((response)=> {
-            console.log(response.data);
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Nhóm thủ thuật đã được xóa',
-                showConfirmButton:false,
-                timer:2000
-            });
-            refreshnhomthuthuat(); 
+    const handleDeleteGroup = (id) => {
+        deleteProcedureGroup(id).then((response) => {
+            if (response) {
+                console.log(response.data);
+                window.makeAlert("success","Xóa nhóm thủ thuật thành công")
+            }
         })
-        .catch((error)=> {
+        .catch((error) => {
             console.log(error);
+            window.makeAlert('error', 'Error', error);
         })
     }
 
-    const deleteThuthuat = (tt) => {
-        console.log(tt);
-        axios
-        .delete(`http://127.0.0.1:8000/xoathuthuat?id=${tt}`)
-        .then((response) => {
-            console.log(response.data);
-            Swal.fire({
-                icon: 'success',
-                title: 'Thủ thuật đã được xóa',
-                showConfirmButton:false,
-                timer:2000
-            });
+    const handleDelete = (id) => {
+        deleteProcedure(id).then((response) => {
+            if (response) {
+                console.log(response.data);
+                window.makeAlert("success","Xóa thủ thuật thành công")
+            }
         })
-        .catch((error)=> {
+        .catch((error) => {
             console.log(error);
+            window.makeAlert('error', 'Error', error);
         })
     }
 
-
-    const refreshnhomthuthuat = () => {
-        axios
-        .get(`http://127.0.0.1:8000/getallnhomthuthuat`)
-        .then((response)=> {
-            console.log(response.data);
-            setData(response.data.allgroup);
+    const handleRefresh = () => {
+        getProcedureGroup().then((response) => {
+            if (response) {
+                console.log(response.data);
+                setData(response.data);
+            }
         })
         .catch((error) => {
-            console.error('Refresh error',error);
+            console.log(error);
+            window.makeAlert('error', 'Error', error);
         })
     }
 
-
-    useEffect(() => {
-        axios.get(`http://127.0.0.1:8000/getallnhomthuthuat`)
-        .then((response) => {
-            setData(response.data.allgroup);
-            })
-            .catch((error) => {
-            console.error('Lỗi khi tải dữ liệu chi tiết: ', error);
-            });
-    },[]);
-
-
-    
-
-
-    const handleDoubleClick = (item) => {
-        console.log(item);
-        axios
-        .get(`http://127.0.0.1:8000/getthuthuat/${item}`)
-        .then((response) => {
-            console.log(response.data);
-            setThuthuatdata(response.data);
-            setThuthuat(item);
+    const handleGetThuThuat = (id) => {
+        getProcedure(id).then((response) => {
+            if (response) {
+                console.log(response.data);
+                setThuthuatdata(response.data[0]);
+                setThuthuat(id);
+                setNhomthuthuat(response.data[1]);
+            }
         })
         .catch((error) => {
-        console.error('Error when fetching group details: ', error);
-        });
-      };
-
-    
-    
-    const handleChoosing = (chosenitem) => {
-        console.log(chosenitem);
-        axios
-        .get(`http://127.0.0.1:8000/thuthuatduocluachon/${chosenitem}`)
-        .then((response) => {
-            console.log(response.data);
-            setThuthuatchosen(response.data);
-            setThuthuatid(chosenitem);
+            console.log(error);
+            window.makeAlert('error', 'Error', error);
+        })
+    }
+   
+    // const handleChoosing = (chosenitem) => {
+    //     console.log(chosenitem);
+    //     axios
+    //     .get(`http://127.0.0.1:8000/thuthuat/chosenData?id=${chosenitem}`)
+    //     .then((response) => {
+    //         console.log(response.data);
+    //         setThuthuatchosen(response.data.data);
+    //         setThuthuatid(chosenitem);
             
-        })
-        .catch((error) => {
-            console.error('Chosen error:', error);
-        })
-    }
+    //     })
+    //     .catch((error) => {
+    //         console.error('Chosen error:', error);
+    //     })
+    // }
 
 
     return (
-    <Modal {...propdata} className="container-fluid thuthuatdieutri">
+    <Modal {...propdata} className="container-fluid thuthuatdieutri" onShow={() => {
+        onShow()
+    }}>
         <Modal.Header>
             <Modal.Title>
                 DANH SÁCH NHÓM THỦ THUẬT ĐIỀU TRỊ
@@ -184,11 +154,11 @@ function ProcedureGroup (propdata) {
                 <Button className="thuthuatbutton" variant="primary" onClick={() => setAddnhomthuthuat(true)}>
                     <i className='bx bx-plus'>THÊM</i>
                 </Button>
-                <Addnhom show={addnhomthuthuat} onHide={() => setAddnhomthuthuat(false)} refreshNhom={refreshnhomthuthuat}/>
+                <Addnhom show={addnhomthuthuat} onHide={() => setAddnhomthuthuat(false)} refreshNhom={handleRefresh}/>
                 <Button className="thuthuatbutton" variant="primary">
                     SỬA
                 </Button>
-                <Button className="refreshbutton" variant="primary" onClick={refreshnhomthuthuat}>
+                <Button className="refreshbutton" variant="primary" onClick={handleRefresh}>
                     REFRESH
                 </Button>
                 <div className="table-wrapper">
@@ -208,19 +178,19 @@ function ProcedureGroup (propdata) {
                             return (
                                 <tr key={item._id} 
                                 style={{cursor:"pointer"}}
-                                onClick={()=>handleDoubleClick(nhomthuthuatId)} 
+                                onClick={()=>handleGetThuThuat(nhomthuthuatId)} 
                                 onContextMenu={(e) => {
                                     e.preventDefault();
                                     handleContextMenuNhomThuthuat(e,item);
                                 }}
                                 >
                                     <td></td>
-                                    <td>{item.ten_nhom_thu_thuat}</td>
+                                    <td>{item.procedureGroup}</td>
 
                                     {clickednhomthuthuat == item._id && (
                                         <div className="card" style={{width: "200px", top:points.y + "px", left:points.x + "px",position:"fixed"}}>
                                             <ul className="list-group list-group-flush">
-                                                    <Button className="thuthuatbutton list-group-item" onClick={() => deleteNhom(nhomthuthuatId)}  >
+                                                    <Button className="thuthuatbutton list-group-item" onClick={() => handleDeleteGroup(nhomthuthuatId)}  >
                                                         Xóa nhóm thủ thuật
                                                     </Button>
                                             </ul>
@@ -251,7 +221,7 @@ function ProcedureGroup (propdata) {
                     <table className="table table-bordered table-responsive-lg" style={{ overflowY:"auto"}}>
                         <thead>
                             <tr>
-                                <th colSpan="3">THỦ THUẬT</th>
+                                <th colSpan="3">THỦ THUẬT CỦA NHÓM: {nhomthuthuat}</th>
                             </tr>
                             <tr>
                                 <th>STT</th>
@@ -259,13 +229,14 @@ function ProcedureGroup (propdata) {
                                 <th>ĐƠN GIÁ</th>
                                 
                             </tr>
+                            
                         </thead>
                         <tbody>
                             {thuthuatdata ? (
                                 thuthuatdata.map((item) => (
                                 <tr key={item._id} 
                                 style={{cursor:"pointer"}}
-                                onClick={()=>handleChoosing(item._id)}
+                                // onClick={()=>handleChoosing(item._id)}
                                 onContextMenu={(e) => {
                                     e.preventDefault();
                                     handleContextMenuThuthuat(e,item);
@@ -273,13 +244,13 @@ function ProcedureGroup (propdata) {
                                 
                                 >
                                     <td></td>
-                                    <td>{item.ten_thu_thuat}</td>
+                                    <td>{item.procedure}</td>
                                     <td>{item.don_gia}</td>
                                     
                                      {clickedthuthuat == item._id && (
                                         <div className="card" style={{width: "200px", top:points.y + "px", left:points.x + "px",position:"fixed"}}>
                                             <ul className="list-group list-group-flush">
-                                                    <Button className="thuthuatbutton list-group-item" onClick={() => deleteThuthuat(item._id)}  >
+                                                    <Button className="thuthuatbutton list-group-item" onClick={() => handleDelete(item._id)}  >
                                                         Xóa thủ thuật
                                                     </Button>
                                             </ul>
